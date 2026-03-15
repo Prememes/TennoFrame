@@ -1,0 +1,6 @@
+[build]
+  command = "pip install requests && python3 fetch_data.py"
+  publish = "."
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
