@@ -148,8 +148,11 @@ if os.path.exists(html_path):
     # Replace the inline-data script block content
     # Pattern: <script id="inline-data">...anything...</script>
     pattern = r'(<script id="inline-data">)(.*?)(</script>)'
-    replacement = r'\g<1>\n' + data_iife + r'\n\g<3>'
-    new_html, n = re.subn(pattern, replacement, html, flags=re.DOTALL)
+
+    def _replace(match):
+        return match.group(1) + '\n' + data_iife + '\n' + match.group(3)
+
+    new_html, n = re.subn(pattern, _replace, html, flags=re.DOTALL)
 
     if n:
         with open(html_path, "w", encoding="utf-8") as f:
