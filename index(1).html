@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TENNOFRAME — Warframe Community Database</title>
+<meta name="description" content="The ultimate Warframe companion: browse warframes, weapons, mods, track Baro Ki'Teer, Nightwave, tier lists, build sharing and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" media="print" onload="this.media='all'">
+<style>
+:root{
+  --bg:#050a0f;--bg2:#0a1520;--bg3:#0f1f30;--panel:#0d1b28;
+  --border:#1a3a52;--border2:#234d6b;
+  --accent:#00d4ff;--accent2:#ff6b1a;--accent3:#7fff6b;
+  --text:#d0e8f0;--text-dim:#6a8fa8;--text-bright:#f0f8ff;
+  --star:#ffc940;
+  --sidebar-w:230px;--header-h:62px;--ad-h:0px;--nav-mob-h:56px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size:14px;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+input,select{font-family:inherit}
+
+/* ── HEADER ── */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:rgba(5,10,15,0.98);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;z-index:300;
+}
+.logo{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:3px;white-space:nowrap}
+.logo-accent{color:var(--accent)}
+.logo-sub{font-size:9px;color:var(--text-dim);letter-spacing:2px;display:block;margin-top:-4px;font-family:'Share Tech Mono',monospace}
+#search-wrap{position:relative;flex:1;max-width:420px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-dim);width:16px;height:16px;display:flex}
+.search-icon svg{width:16px;height:16px}
+#search-bar{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px 12px 8px 34px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s}
+#search-bar:focus{border-color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.sort-wrap{display:flex;align-items:center;gap:6px}
+.sort-label{font-size:10px;color:var(--text-dim);letter-spacing:1px;white-space:nowrap;font-family:'Share Tech Mono',monospace}
+#sort-select{background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--text);padding:5px 8px;font-size:12px;outline:none;cursor:pointer}
+
+/* ── AD BANNER ── */
+.ad-banner{
+  display:none !important;
+  font-size:11px;color:var(--text-dim);letter-spacing:1px;font-family:'Share Tech Mono',monospace;
+}
+
+/* ── SIDEBAR ── */
+#shell{display:flex;margin-top:calc(var(--header-h) + var(--ad-h));min-height:calc(100vh - var(--header-h) - var(--ad-h))}
+#sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:var(--bg2);border-right:1px solid var(--border);
+  position:fixed;top:calc(var(--header-h) + var(--ad-h));bottom:0;
+  display:flex;flex-direction:column;padding:16px 0 20px;z-index:200;overflow-y:auto;
+}
+.sb-label{font-size:9px;color:var(--text-dim);letter-spacing:2px;padding:0 16px 6px;font-family:'Share Tech Mono',monospace;display:block}
+.sb-divider{border-top:1px solid var(--border);margin:10px 0}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 16px;
+  cursor:pointer;transition:background .15s,color .15s;font-size:13px;letter-spacing:.5px;
+  border-left:2px solid transparent;color:var(--text-dim);
+}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.6}
+.nav-item:hover{background:rgba(0,212,255,.06);color:var(--text)}
+.nav-item.active{background:rgba(0,212,255,.1);color:var(--accent);border-left-color:var(--accent)}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--text-dim)}
+.nav-item.active .nav-badge{border-color:var(--accent);color:var(--accent)}
+
+/* ── MAIN CONTENT ── */
+#main{flex:1;margin-left:var(--sidebar-w);min-width:0;padding:24px}
+.page{display:none}.page.active{display:block}
+.section-header{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;color:var(--text-bright);margin-bottom:16px;display:flex;align-items:baseline;gap:10px}
+.section-count{font-size:13px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px}
+.filter-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 14px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--text-dim);letter-spacing:.5px}
+.pill:hover{border-color:var(--accent);color:var(--accent)}
+.pill.active{background:rgba(0,212,255,.12);border-color:var(--accent);color:var(--accent)}
+.error-state{display:none;padding:20px;color:var(--accent2);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;border:1px solid var(--accent2);border-radius:4px;margin-bottom:16px}
+.no-results{padding:40px;text-align:center;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:2px}
+
+/* ── SKELETON ── */
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skeleton-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.skeleton-card-img{aspect-ratio:3/4;background:linear-gradient(90deg,var(--bg3) 25%,var(--bg2) 50%,var(--bg3) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite}
+.skeleton-card-body{padding:10px}
+.skeleton-line{height:10px;border-radius:3px;background:linear-gradient(90deg,var(--bg3) 25%,var(--bg2) 50%,var(--bg3) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;margin-bottom:6px}
+.skeleton-line.short{width:60%}.skeleton-line.xshort{width:28%;flex:none}
+.skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:16px}
+
+/* ── WARFRAME CARDS ── */
+#warframe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
+.wf-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s}
+.wf-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.wf-card-img-wrap{width:100%;aspect-ratio:3/4;display:block;overflow:hidden;background:var(--bg3)}
+.wf-card-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.wf-card-img-placeholder{width:100%;aspect-ratio:3/4;background:linear-gradient(135deg,var(--bg3),var(--bg2));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--border2);letter-spacing:2px}
+.wf-card-body{padding:10px}
+.wf-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text-bright);display:block;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wf-type{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:8px;font-family:'Share Tech Mono',monospace}
+.wf-type-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.wf-stats{display:flex;gap:4px;flex-wrap:wrap}
+.stat-chip{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font-size:10px;display:flex;gap:4px;align-items:center}
+.stat-chip-label{color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:9px}
+.stat-chip-val{color:var(--text-bright);font-weight:600}
+.mini-stars{color:var(--star);font-size:11px;letter-spacing:1px}
+.mini-rating-txt{font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace}
+
+/* ── WEAPON CARDS ── */
+#primary-grid,#secondary-grid,#melee-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.weapon-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px;cursor:pointer;transition:border-color .2s,transform .15s;display:flex;align-items:center;gap:12px}
+.weapon-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.wp-icon{width:52px;height:52px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;color:var(--text-dim)}
+.wp-icon img{width:100%;height:100%;object-fit:contain}
+.wp-icon-wrap{display:block;width:100%;height:100%}
+.weapon-info{min-width:0;flex:1}
+.weapon-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.weapon-sub{font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px;margin-bottom:6px}
+.weapon-stats{display:flex;gap:6px;font-size:10px;flex-wrap:wrap}
+.ws{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-family:'Share Tech Mono',monospace}
+.ws span{color:var(--text-dim);margin-right:3px}
+
+/* ── MOD CARDS ── */
+#mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.mod-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;transition:border-color .2s;display:flex;align-items:flex-start;gap:10px}
+.mod-card:hover{border-color:var(--accent)}
+.mod-icon{width:36px;height:36px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10px;color:var(--text-dim)}
+.mod-icon img{width:100%;height:100%;object-fit:contain}
+.mod-info{min-width:0;flex:1}
+.mod-name{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:.3px;color:var(--text-bright);display:block;margin-bottom:2px}
+.mod-rank{font-size:9px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.5px}
+.mod-type-badge{display:inline-block;font-size:9px;font-family:'Share Tech Mono',monospace;padding:1px 6px;border-radius:2px;letter-spacing:.5px;border:1px solid;margin-top:4px}
+.rarity-Common .mod-type-badge{color:#8ab;border-color:#4a6a7a}
+.rarity-Uncommon .mod-type-badge{color:#8cb;border-color:#3a6a4a}
+.rarity-Rare .mod-type-badge{color:#dba;border-color:#6a4a2a}
+.rarity-Legendary .mod-type-badge{color:#e8c;border-color:#6a2a4a}
+
+/* ── PATCH NOTES ── */
+.patch-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden}
+.patch-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px;font-size:15px}
+.patch-header:hover{background:rgba(0,212,255,.04)}
+.patch-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.patch-date{margin-left:auto;font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace}
+.patch-body{display:none;padding:0 16px 14px;font-size:13px;line-height:1.7;color:var(--text-dim);border-top:1px solid var(--border)}
+.patch-body.open{display:block}
+
+/* ── TRACKER ── */
+.tracker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.tracker-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px}
+.tracker-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:1.5px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.tracker-subtitle{font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px}
+.tracker-countdown{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--accent2);letter-spacing:2px;margin:8px 0}
+.baro-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.baro-item:last-child{border-bottom:none}
+.baro-item-name{flex:1;font-size:12px;color:var(--text)}
+.baro-item-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim)}
+.baro-item-cost span{color:var(--star)}
+.nw-challenge{padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px}
+.nw-challenge:last-child{border-bottom:none}
+.nw-check{width:14px;height:14px;border:1px solid var(--border2);border-radius:2px;flex-shrink:0;margin-top:1px}
+.nw-name{font-size:12px;color:var(--text);flex:1}
+.nw-rep{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent3)}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);display:inline-block;animation:livepulse 1.5s infinite}
+
+/* ── TIER LIST ── */
+.tier-row{display:flex;gap:0;margin-bottom:8px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.tier-label{width:48px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;flex-shrink:0}
+.tier-S .tier-label{background:#c41e3a;color:#fff}
+.tier-A .tier-label{background:#e07800;color:#fff}
+.tier-B .tier-label{background:#2d7a00;color:#fff}
+.tier-C .tier-label{background:#004a8a;color:#fff}
+.tier-D .tier-label{background:#4a4a4a;color:#fff}
+.tier-items{flex:1;display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--bg2)}
+.tier-item{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tier-item:hover{border-color:var(--accent);color:var(--accent)}
+.tier-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tier-tab{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 16px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--text-dim)}
+.tier-tab:hover{border-color:var(--accent);color:var(--accent)}
+.tier-tab.active{background:rgba(0,212,255,.12);border-color:var(--accent);color:var(--accent)}
+.tier-unranked{margin-top:16px}
+.tier-unranked-title{font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:1.5px;margin-bottom:8px}
+
+/* ── COMPARE ── */
+.compare-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare-search-wrap{position:relative}
+.compare-results{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:4px;z-index:50;max-height:240px;overflow-y:auto}
+.compare-result-item{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.compare-result-item:hover{background:rgba(0,212,255,.08);color:var(--accent)}
+.compare-panel{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px}
+.compare-name{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;color:var(--accent);margin-bottom:12px}
+.compare-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.compare-stat-label{color:var(--text-dim);font-family:'Share Tech Mono',monospace}
+.compare-stat-val{font-weight:600}
+.compare-win{color:var(--accent3)}
+.compare-placeholder{display:flex;align-items:center;justify-content:center;height:200px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;border:1px dashed var(--border);border-radius:6px}
+
+/* ── BUILD SHARE ── */
+.build-form{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:16px}
+.build-form-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;color:var(--text-bright);margin-bottom:12px}
+.build-form input,.build-form select,.build-form textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;margin-bottom:8px;transition:border-color .2s;font-family:inherit}
+.build-form input:focus,.build-form select:focus,.build-form textarea:focus{border-color:var(--accent)}
+.build-form textarea{min-height:80px;resize:vertical}
+.build-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.submit-btn{background:rgba(0,212,255,.1);border:1px solid var(--accent);color:var(--accent);border-radius:4px;padding:8px 20px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;transition:background .2s;width:100%}
+.submit-btn:hover{background:rgba(0,212,255,.2)}
+.build-share-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:8px}
+.build-share-title{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;color:var(--text-bright);margin-bottom:4px}
+.build-share-meta{font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.5px;margin-bottom:8px}
+.build-share-code{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent);background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:pointer;word-break:break-all}
+.build-share-code:hover{border-color:var(--accent)}
+
+/* ── MODAL ── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.open{display:flex}
+#modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:100%;max-width:820px;max-height:90vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:12px;right:12px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--text-dim);font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:10}
+.modal-close:hover{border-color:var(--accent2);color:var(--accent2)}
+.modal-handle{display:none;width:40px;height:4px;border-radius:2px;background:var(--border2);margin:8px auto 0}
+#modal-content{padding:24px}
+.modal-top{display:flex;gap:20px;margin-bottom:20px}
+.modal-img{width:120px;height:160px;object-fit:cover;object-position:top center;border-radius:4px;border:1px solid var(--border);flex-shrink:0}
+.modal-img-placeholder{width:120px;height:160px;background:linear-gradient(135deg,var(--bg3),var(--bg));border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--border2);flex-shrink:0}
+.modal-img:hover{transform:scale(1.06);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;letter-spacing:2px;color:var(--text-bright);margin-bottom:6px}
+.modal-subtitle{font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:1.5px;margin-bottom:12px}
+.modal-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.modal-stat{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px;text-align:center}
+.modal-stat-label{font-size:9px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px;display:block;margin-bottom:3px}
+.modal-stat-val{font-size:16px;font-weight:700;color:var(--text-bright);font-family:'Rajdhani',sans-serif}
+.modal-section-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;color:var(--accent);margin:16px 0 8px;text-transform:uppercase}
+.ability{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px}
+.ability-name{font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px;color:var(--text-bright);margin-bottom:4px}
+.ability-desc{font-size:12px;color:var(--text-dim);line-height:1.6}
+.drop-list{display:flex;flex-direction:column;gap:4px}
+.drop-item{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.drop-location{font-size:11px;color:var(--text);flex:1}
+.drop-location small{display:block;color:var(--text-dim);font-size:10px;margin-top:1px}
+.drop-chance{font-family:'Share Tech Mono',monospace;font-size:11px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.drop-rarity-badge{font-size:9px;padding:1px 5px;border-radius:2px}
+.drop-chance.common{color:#5b9}
+.drop-chance.uncommon{color:#9b5}
+.drop-chance.rare{color:var(--accent2)}
+.no-drops{padding:12px;font-size:12px;color:var(--text-dim);line-height:1.6}
+.builds-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.build-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px}
+.build-card-title{font-size:11px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;margin-bottom:8px}
+.build-card-title.beginner{color:var(--accent3)}
+.build-card-title.advanced{color:var(--accent2)}
+.build-mods{display:flex;flex-wrap:wrap;gap:5px}
+.mod-chip{background:var(--bg2);border:1px solid var(--border2);border-radius:3px;padding:3px 8px;font-size:10px;color:var(--text);cursor:pointer;transition:all .15s;position:relative}
+.mod-chip:hover{border-color:var(--accent);color:var(--accent)}
+.mod-preview-popup{position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--accent);border-radius:4px;padding:6px;pointer-events:none;display:none}
+.mod-preview-popup img{width:120px;height:120px;object-fit:contain;display:block}
+.reviews-section{margin-top:8px}
+.reviews-summary{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.reviews-avg{font-size:36px;font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--star)}
+.reviews-bars{flex:1}
+.rating-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.rating-bar-label{font-size:10px;color:var(--text-dim);width:12px;font-family:'Share Tech Mono',monospace}
+.rating-bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.rating-bar-fill{height:100%;background:var(--star);border-radius:3px}
+.rating-bar-count{font-size:10px;color:var(--text-dim);width:20px;text-align:right;font-family:'Share Tech Mono',monospace}
+.review-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px}
+.review-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.review-author{font-size:11px;font-weight:600;color:var(--text-bright);flex:1}
+.review-stars{color:var(--star);font-size:12px}
+.review-date{font-size:9px;color:var(--text-dim);font-family:'Share Tech Mono',monospace}
+.review-text{font-size:12px;color:var(--text-dim);line-height:1.5}
+.review-form{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.review-form input,.review-form textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;margin-bottom:6px;transition:border-color .2s;font-family:inherit}
+.review-form input:focus,.review-form textarea:focus{border-color:var(--accent)}
+.review-form textarea{min-height:70px;resize:vertical}
+.star-row{display:flex;gap:4px;margin-bottom:8px}
+.star-btn{font-size:20px;cursor:pointer;color:var(--border2);transition:color .1s;background:none;border:none;line-height:1}
+.star-btn.lit{color:var(--star)}
+.submit-review-btn{background:rgba(0,212,255,.1);border:1px solid var(--accent);color:var(--accent);border-radius:4px;padding:7px 16px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1.5px;transition:background .2s}
+.submit-review-btn:hover{background:rgba(0,212,255,.2)}
+.vote-options{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.vote-btn{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:6px 16px;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text-dim)}
+.vote-btn:hover,.vote-btn.selected{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.1)}
+.vote-current{font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;margin-top:6px}
+
+/* ── TOAST ── */
+#tf-toast{position:fixed;bottom:20px;right:20px;z-index:9000;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:12px;font-family:'Share Tech Mono',monospace;color:var(--text);display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .3s;pointer-events:none;max-width:320px}
+#tf-toast.show{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast-spinner{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.toast-bar-wrap{height:2px;background:var(--border);border-radius:1px;margin-top:6px;overflow:hidden}
+.toast-bar{height:100%;background:var(--accent);border-radius:1px;transition:width .3s}
+
+/* ── MOBILE BOTTOM NAV ── */
+@media(max-width:768px){
+  #sidebar{display:none}
+  #main{margin-left:0;padding:16px;padding-bottom:calc(var(--nav-mob-h)+16px)}
+  #shell{margin-top:calc(var(--header-h) + var(--ad-h))}
+  .ad-banner{display:none}
+  #shell{margin-top:var(--header-h)}
+  #mob-nav{display:flex}
+  .logo-sub{display:none}
+  #modal{border-radius:16px 16px 0 0;max-height:85vh}
+  #modal-overlay{padding:0;align-items:flex-end}
+  .modal-handle{display:block}
+  .builds-grid{grid-template-columns:1fr}
+  .compare-layout{grid-template-columns:1fr}
+  #warframe-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+}
+@media(min-width:769px){#mob-nav{display:none!important}}
+#mob-nav{
+  position:fixed;bottom:0;left:0;right:0;height:var(--nav-mob-h);
+  background:rgba(5,10,15,.98);border-top:1px solid var(--border);z-index:300;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  gap:0;flex-shrink:0;
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:4px 12px;cursor:pointer;min-width:56px;
+  font-size:8px;color:var(--text-dim);letter-spacing:.5px;font-family:'Share Tech Mono',monospace;
+  border:none;background:none;transition:color .15s;white-space:nowrap;
+}
+.nav-btn svg{width:18px;height:18px;margin-bottom:1px}
+.nav-btn.active{color:var(--accent)}
+.nav-badge{font-size:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0 5px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TENNO<span class="logo-accent">FRAME</span><span class="logo-sub">COMMUNITY DATABASE</span></div>
+  <div id="search-wrap">
+    <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+    <input id="search-bar" type="search" placeholder="Search warframes…" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="header-right">
+    <div class="sort-wrap">
+      <span class="sort-label">SORT</span>
+      <select id="sort-select">
+        <option value="az">A → Z</option>
+        <option value="za">Z → A</option>
+        <option value="popular">Most Popular</option>
+        <option value="top_rated">Top Rated</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<div class="ad-banner">[ ADVERTISEMENT SLOT — 728×90 ]</div>
+
+<div id="shell">
+  <nav id="sidebar">
+    <span class="sb-label">Arsenal</span>
+    <div class="nav-item active" data-page="warframes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Warframes<span class="nav-badge" id="badge-wf">—</span></div>
+    <div class="nav-item" data-page="primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="10" width="14" height="4" rx="1"/><path d="M16 12h4"/><path d="M18 10v4"/><circle cx="6" cy="12" r="1"/></svg>Primary<span class="nav-badge" id="badge-pr">—</span></div>
+    <div class="nav-item" data-page="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 12h4"/><path d="M7 9V7"/><path d="M7 17v-2"/></svg>Secondary<span class="nav-badge" id="badge-se">—</span></div>
+    <div class="nav-item" data-page="melee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4l5.5 5.5-9 9L5.5 13l9-9z"/><path d="M3 21l3.5-3.5"/></svg>Melee<span class="nav-badge" id="badge-me">—</span></div>
+    <div class="sb-divider"></div>
+    <span class="sb-label">Gear</span>
+    <div class="nav-item" data-page="mods"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Mods<span class="nav-badge" id="badge-mo">—</span></div>
+    <div class="sb-divider"></div>
+    <span class="sb-label">Tools</span>
+    <div class="nav-item" data-page="tracker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Tracker</div>
+    <div class="nav-item" data-page="patchnotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Patch Notes</div>
+    <div class="nav-item" data-page="tierlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Tier List</div>
+    <div class="nav-item" data-page="compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>Compare</div>
+    <div class="nav-item" data-page="builds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Builds</div>
+  </nav>
+
+  <div id="main">
+    <!-- WARFRAMES -->
+    <div id="page-warframes" class="page active">
+      <div class="section-header">Warframe Index <span class="section-count" id="count-wf">…</span></div>
+      <div id="wf-error" class="error-state">DATALINK FAILURE — CHECK CONNECTION</div>
+      <div class="skeleton-grid" id="wf-skeleton">
+        <div class="skeleton-card"><div class="skeleton-card-img"></div><div class="skeleton-card-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-card-img"></div><div class="skeleton-card-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-card-img"></div><div class="skeleton-card-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-card-img"></div><div class="skeleton-card-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-card-img"></div><div class="skeleton-card-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-card-img"></div><div class="skeleton-card-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+      </div>
+      <div id="warframe-grid" style="display:none"></div>
+    </div>
+
+    <!-- PRIMARY -->
+    <div id="page-primary" class="page">
+      <div class="section-header">Primary Weapons <span class="section-count" id="count-pr">…</span></div>
+      <div class="filter-pills" id="pr-filters">
+        <div class="pill active" data-filter="">All</div>
+        <div class="pill" data-filter="Rifle">Rifle</div>
+        <div class="pill" data-filter="Shotgun">Shotgun</div>
+        <div class="pill" data-filter="Sniper Rifle">Sniper</div>
+        <div class="pill" data-filter="Launcher">Launcher</div>
+        <div class="pill" data-filter="Bow">Bow</div>
+      </div>
+      <div id="wp-error" class="error-state">DATALINK FAILURE — CHECK CONNECTION</div>
+      <div class="skeleton-grid" id="pr-skeleton" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+      </div>
+      <div id="primary-grid" style="display:none"></div>
+    </div>
+
+    <!-- SECONDARY -->
+    <div id="page-secondary" class="page">
+      <div class="section-header">Secondary Weapons <span class="section-count" id="count-se">…</span></div>
+      <div class="filter-pills" id="se-filters">
+        <div class="pill active" data-filter="">All</div>
+        <div class="pill" data-filter="Pistol">Pistol</div>
+        <div class="pill" data-filter="Dual Pistols">Dual</div>
+        <div class="pill" data-filter="Throwing">Thrown</div>
+      </div>
+      <div class="skeleton-grid" id="se-skeleton" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+      </div>
+      <div id="secondary-grid" style="display:none"></div>
+    </div>
+
+    <!-- MELEE -->
+    <div id="page-melee" class="page">
+      <div class="section-header">Melee Weapons <span class="section-count" id="count-me">…</span></div>
+      <div class="filter-pills" id="me-filters">
+        <div class="pill active" data-filter="">All</div>
+        <div class="pill" data-filter="mr:0-3">MR 0–3</div>
+        <div class="pill" data-filter="mr:4-7">MR 4–7</div>
+        <div class="pill" data-filter="mr:8-11">MR 8–11</div>
+        <div class="pill" data-filter="mr:12-99">MR 12+</div>
+      </div>
+      <div class="skeleton-grid" id="me-skeleton" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card" style="padding:12px;display:flex;gap:10px"><div style="width:52px;height:52px;background:var(--bg3);border-radius:4px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+      </div>
+      <div id="melee-grid" style="display:none"></div>
+    </div>
+
+    <!-- MODS -->
+    <div id="page-mods" class="page">
+      <div class="section-header">Mod Database <span class="section-count" id="count-mo">…</span></div>
+      <div class="filter-pills" id="mod-filters">
+        <div class="pill active" data-filter="">All</div>
+        <div class="pill" data-filter="Warframe">Warframe</div>
+        <div class="pill" data-filter="Primary">Primary</div>
+        <div class="pill" data-filter="Secondary">Secondary</div>
+        <div class="pill" data-filter="Melee">Melee</div>
+        <div class="pill" data-filter="Companion">Companion</div>
+        <div class="pill" data-filter="Archwing">Archwing</div>
+        <div class="pill" data-filter="K-Drive">K-Drive</div>
+        <div class="pill" data-filter="Focus Way">Focus</div>
+      </div>
+      <div id="mo-error" class="error-state">DATALINK FAILURE — CHECK CONNECTION</div>
+      <div class="skeleton-grid" id="mo-skeleton" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+        <div class="skeleton-card" style="padding:10px;display:flex;gap:8px"><div style="width:36px;height:36px;background:var(--bg3);border-radius:3px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card" style="padding:10px;display:flex;gap:8px"><div style="width:36px;height:36px;background:var(--bg3);border-radius:3px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="skeleton-card" style="padding:10px;display:flex;gap:8px"><div style="width:36px;height:36px;background:var(--bg3);border-radius:3px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+      </div>
+      <div id="mod-grid" style="display:none"></div>
+    </div>
+
+    <!-- TRACKER -->
+    <div id="page-tracker" class="page">
+      <div class="section-header">Live Tracker <span class="live-dot" style="margin-left:6px"></span></div>
+      <div id="tracker-content"><div style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">ESTABLISHING DATALINK…</div></div>
+    </div>
+
+    <!-- PATCH NOTES -->
+    <div id="page-patchnotes" class="page">
+      <div class="section-header">Patch Notes</div>
+      <div id="patch-list"><div style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">LOADING…</div></div>
+    </div>
+
+    <!-- TIER LIST -->
+    <div id="page-tierlist" class="page">
+      <div class="section-header">Community Tier List</div>
+      <div class="tier-tabs" id="tier-tabs">
+        <div class="tier-tab active" data-cat="warframes">Warframes</div>
+        <div class="tier-tab" data-cat="primary">Primary</div>
+        <div class="tier-tab" data-cat="secondary">Secondary</div>
+        <div class="tier-tab" data-cat="melee">Melee</div>
+      </div>
+      <div id="tier-content"></div>
+    </div>
+
+    <!-- COMPARE -->
+    <div id="page-compare" class="page">
+      <div class="section-header">Item Comparison</div>
+      <div class="compare-layout">
+        <div>
+          <div class="compare-search-wrap" style="margin-bottom:16px">
+            <input id="cmp-a-input" class="build-form" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-size:12px;outline:none" placeholder="Search item A…">
+            <div class="compare-results" id="cmp-a-results" style="display:none"></div>
+          </div>
+          <div id="cmp-a-panel"><div class="compare-placeholder">SELECT ITEM A</div></div>
+        </div>
+        <div>
+          <div class="compare-search-wrap" style="margin-bottom:16px">
+            <input id="cmp-b-input" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-size:12px;outline:none" placeholder="Search item B…">
+            <div class="compare-results" id="cmp-b-results" style="display:none"></div>
+          </div>
+          <div id="cmp-b-panel"><div class="compare-placeholder">SELECT ITEM B</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUILDS -->
+    <div id="page-builds" class="page">
+      <div class="section-header">Build Share</div>
+      <div class="build-form">
+        <div class="build-form-title">CREATE A BUILD</div>
+        <div class="build-form-row">
+          <input id="build-name" placeholder="Build name (e.g. Saryn Spore Nuke)">
+          <select id="build-category">
+            <option value="Warframe">Warframe</option>
+            <option value="Primary">Primary</option>
+            <option value="Secondary">Secondary</option>
+            <option value="Melee">Melee</option>
+          </select>
+        </div>
+        <input id="build-item" placeholder="Item name (e.g. Saryn Prime)">
+        <textarea id="build-notes" placeholder="Describe your build, mod choices, playstyle…"></textarea>
+        <input id="build-author" placeholder="Your username (optional)">
+        <button class="submit-btn" onclick="submitBuild()">SHARE BUILD</button>
+      </div>
+      <div style="margin-bottom:12px">
+        <input id="build-load-code" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;margin-bottom:8px" placeholder="Paste a TF- share code to load a build…">
+        <button class="submit-btn" style="width:auto;padding:8px 20px" onclick="loadBuildCode()">LOAD CODE</button>
+      </div>
+      <div class="section-header" style="font-size:16px;margin-top:8px">Community Builds</div>
+      <div id="community-builds"><div style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:16px 0">No community builds yet — be the first!</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<nav id="mob-nav">
+  <button class="nav-btn active" data-page="warframes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>WF<span class="nav-badge" id="mbadge-wf">—</span></button>
+  <button class="nav-btn" data-page="primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="10" width="14" height="4" rx="1"/><path d="M16 12h4"/></svg>PRI</button>
+  <button class="nav-btn" data-page="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 12h4"/></svg>SEC</button>
+  <button class="nav-btn" data-page="melee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4l5.5 5.5-9 9L5.5 13l9-9z"/></svg>MEL</button>
+  <button class="nav-btn" data-page="mods"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>MODS</button>
+  <button class="nav-btn" data-page="tracker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>TRACK</button>
+  <button class="nav-btn" data-page="patchnotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PATCH</button>
+  <button class="nav-btn" data-page="tierlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>TIERS</button>
+  <button class="nav-btn" data-page="compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>CMP</button>
+  <button class="nav-btn" data-page="builds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>BUILDS</button>
+</nav>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" id="modal-close-btn">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- MOD IMAGE PREVIEW POPUP -->
+<div class="mod-preview-popup" id="mod-preview-popup"><img id="mod-preview-img" src="" alt=""></div>
+
+<!-- TOAST -->
+<div id="tf-toast"><div class="toast-spinner" id="toast-spin"></div><span id="toast-txt"></span></div>
+
+<!-- ═══════════════════ INLINE DATA ═══════════════════ -->
+<script id="inline-data">
+(function(){
+  if(window.TF_DATA) return;
+  window.TF_DATA = {
+    warframes: [{"name":"Ash","health":450,"shield":270,"armor":105,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ash.png"},{"name":"Ash Prime","health":550,"shield":370,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ash_Prime.png"},{"name":"Atlas","health":690,"shield":270,"armor":575,"power":100,"masteryReq":0,"sprintSpeed":0.95,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Atlas.png"},{"name":"Atlas Prime","health":790,"shield":270,"armor":700,"power":100,"masteryReq":0,"sprintSpeed":0.95,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Atlas_Prime.png"},{"name":"Banshee","health":225,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Banshee.png"},{"name":"Banshee Prime","health":375,"shield":470,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Banshee_Prime.png"},{"name":"Baruuk","health":900,"shield":0,"armor":150,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Baruuk.png"},{"name":"Caliban","health":500,"shield":400,"armor":250,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Caliban.png"},{"name":"Chroma","health":450,"shield":450,"armor":350,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Chroma.png"},{"name":"Chroma Prime","health":525,"shield":550,"armor":425,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Chroma_Prime.png"},{"name":"Citrine","health":600,"shield":400,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Citrine.png"},{"name":"Dagath","health":675,"shield":0,"armor":350,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Dagath.png"},{"name":"Ember","health":300,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ember.png"},{"name":"Ember Prime","health":375,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ember_Prime.png"},{"name":"Equinox","health":375,"shield":270,"armor":100,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Equinox.png"},{"name":"Equinox Prime","health":450,"shield":370,"armor":100,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Equinox_Prime.png"},{"name":"Excalibur","health":300,"shield":270,"armor":225,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Excalibur.png"},{"name":"Excalibur Prime","health":300,"shield":270,"armor":225,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Excalibur_Prime.png"},{"name":"Excalibur Umbra","health":300,"shield":270,"armor":225,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Excalibur_Umbra.png"},{"name":"Frost","health":300,"shield":570,"armor":105,"power":100,"masteryReq":0,"sprintSpeed":0.95,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Frost.png"},{"name":"Frost Prime","health":375,"shield":670,"armor":105,"power":100,"masteryReq":0,"sprintSpeed":0.95,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Frost_Prime.png"},{"name":"Gara","health":300,"shield":270,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gara.png"},{"name":"Gara Prime","health":375,"shield":370,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gara_Prime.png"},{"name":"Garuda","health":600,"shield":270,"armor":150,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Garuda.png"},{"name":"Garuda Prime","health":675,"shield":370,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Garuda_Prime.png"},{"name":"Gauss","health":600,"shield":270,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.35,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gauss.png"},{"name":"Gauss Prime","health":700,"shield":370,"armor":225,"power":100,"masteryReq":0,"sprintSpeed":1.35,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gauss_Prime.png"},{"name":"Grendel","health":1115,"shield":270,"armor":250,"power":100,"masteryReq":0,"sprintSpeed":0.9,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Grendel.png"},{"name":"Grendel Prime","health":1215,"shield":370,"armor":275,"power":100,"masteryReq":0,"sprintSpeed":0.9,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Grendel_Prime.png"},{"name":"Gyre","health":450,"shield":450,"armor":250,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gyre.png"},{"name":"Harrow","health":925,"shield":270,"armor":35,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Harrow.png"},{"name":"Harrow Prime","health":1000,"shield":270,"armor":35,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Harrow_Prime.png"},{"name":"Hildryn","health":775,"shield":2250,"armor":200,"power":0,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hildryn.png"},{"name":"Hildryn Prime","health":875,"shield":2500,"armor":225,"power":0,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hildryn_Prime.png"},{"name":"Hydroid","health":450,"shield":270,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hydroid.png"},{"name":"Hydroid Prime","health":525,"shield":370,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hydroid_Prime.png"},{"name":"Inaros","health":3700,"shield":0,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Inaros.png"},{"name":"Inaros Prime","health":4200,"shield":0,"armor":225,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Inaros_Prime.png"},{"name":"Ivara","health":225,"shield":270,"armor":65,"power":150,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ivara.png"},{"name":"Ivara Prime","health":300,"shield":370,"armor":65,"power":150,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ivara_Prime.png"},{"name":"Jade","health":500,"shield":500,"armor":250,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Jade.png"},{"name":"Khora","health":450,"shield":270,"armor":275,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Khora.png"},{"name":"Khora Prime","health":525,"shield":370,"armor":300,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Khora_Prime.png"},{"name":"Kullervo","health":750,"shield":270,"armor":250,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kullervo.png"},{"name":"Lavos","health":600,"shield":0,"armor":550,"power":0,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Lavos.png"},{"name":"Limbo","health":300,"shield":270,"armor":35,"power":175,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Limbo.png"},{"name":"Limbo Prime","health":375,"shield":370,"armor":35,"power":200,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Limbo_Prime.png"},{"name":"Loki","health":150,"shield":270,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.25,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Loki.png"},{"name":"Loki Prime","health":225,"shield":370,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.25,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Loki_Prime.png"},{"name":"Mag","health":225,"shield":570,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Mag.png"},{"name":"Mag Prime","health":300,"shield":670,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Mag_Prime.png"},{"name":"Mesa","health":375,"shield":270,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Mesa.png"},{"name":"Mesa Prime","health":450,"shield":370,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Mesa_Prime.png"},{"name":"Mirage","health":375,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.25,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Mirage.png"},{"name":"Mirage Prime","health":450,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.25,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Mirage_Prime.png"},{"name":"Nekros","health":375,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nekros.png"},{"name":"Nekros Prime","health":525,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nekros_Prime.png"},{"name":"Nezha","health":450,"shield":270,"armor":35,"power":100,"masteryReq":0,"sprintSpeed":1.2,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nezha.png"},{"name":"Nezha Prime","health":525,"shield":370,"armor":35,"power":100,"masteryReq":0,"sprintSpeed":1.2,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nezha_Prime.png"},{"name":"Nidus","health":750,"shield":0,"armor":250,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nidus.png"},{"name":"Nidus Prime","health":900,"shield":0,"armor":275,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nidus_Prime.png"},{"name":"Nova","health":300,"shield":270,"armor":15,"power":175,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nova.png"},{"name":"Nova Prime","health":375,"shield":370,"armor":15,"power":175,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nova_Prime.png"},{"name":"Nyx","health":225,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nyx.png"},{"name":"Nyx Prime","health":300,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nyx_Prime.png"},{"name":"Oberon","health":375,"shield":270,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Oberon.png"},{"name":"Oberon Prime","health":450,"shield":370,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Oberon_Prime.png"},{"name":"Octavia","health":375,"shield":270,"armor":35,"power":100,"masteryReq":0,"sprintSpeed":1.25,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Octavia.png"},{"name":"Octavia Prime","health":450,"shield":370,"armor":35,"power":100,"masteryReq":0,"sprintSpeed":1.25,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Octavia_Prime.png"},{"name":"Protea","health":400,"shield":400,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Protea.png"},{"name":"Protea Prime","health":475,"shield":475,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Protea_Prime.png"},{"name":"Qorvex","health":600,"shield":600,"armor":350,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Qorvex.png"},{"name":"Revenant","health":450,"shield":270,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.05,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Revenant.png"},{"name":"Revenant Prime","health":525,"shield":370,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.05,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Revenant_Prime.png"},{"name":"Rhino","health":450,"shield":270,"armor":350,"power":100,"masteryReq":0,"sprintSpeed":0.95,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rhino.png"},{"name":"Rhino Prime","health":525,"shield":370,"armor":425,"power":100,"masteryReq":0,"sprintSpeed":0.95,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rhino_Prime.png"},{"name":"Saryn","health":375,"shield":270,"armor":125,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Saryn.png"},{"name":"Saryn Prime","health":450,"shield":370,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Saryn_Prime.png"},{"name":"Sevagoth","health":600,"shield":0,"armor":300,"power":100,"masteryReq":0,"sprintSpeed":1.05,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Sevagoth.png"},{"name":"Styanax","health":700,"shield":700,"armor":350,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Styanax.png"},{"name":"Titania","health":400,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Titania.png"},{"name":"Titania Prime","health":475,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Titania_Prime.png"},{"name":"Trinity","health":300,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Trinity.png"},{"name":"Trinity Prime","health":375,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Trinity_Prime.png"},{"name":"Valkyr","health":150,"shield":270,"armor":600,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Valkyr.png"},{"name":"Valkyr Prime","health":225,"shield":370,"armor":675,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Valkyr_Prime.png"},{"name":"Vauban","health":300,"shield":270,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vauban.png"},{"name":"Vauban Prime","health":375,"shield":370,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vauban_Prime.png"},{"name":"Volt","health":300,"shield":470,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Volt.png"},{"name":"Volt Prime","health":375,"shield":570,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Volt_Prime.png"},{"name":"Voruna","health":600,"shield":0,"armor":400,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Voruna.png"},{"name":"Wisp","health":450,"shield":270,"armor":15,"power":175,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Wisp.png"},{"name":"Wisp Prime","health":525,"shield":370,"armor":15,"power":200,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Wisp_Prime.png"},{"name":"Wukong","health":450,"shield":270,"armor":175,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Wukong.png"},{"name":"Wukong Prime","health":525,"shield":370,"armor":200,"power":100,"masteryReq":0,"sprintSpeed":1.15,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Wukong_Prime.png"},{"name":"Xaku","health":450,"shield":450,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Xaku.png"},{"name":"Yareli","health":250,"shield":750,"armor":65,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Yareli.png"},{"name":"Zephyr","health":225,"shield":270,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.2,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Zephyr.png"},{"name":"Zephyr Prime","health":300,"shield":370,"armor":15,"power":100,"masteryReq":0,"sprintSpeed":1.2,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Zephyr_Prime.png"},{"name":"Uriel","health":600,"shield":600,"armor":300,"power":100,"masteryReq":0,"sprintSpeed":1.1,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Uriel.png"}],
+    weapons: [{"name":"Acceltra","category":"Primary","type":"Rifle","damage":60,"criticalChance":0.28,"criticalMultiplier":2.0,"procChance":0.28,"fireRate":8.0,"masteryReq":8,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Acceltra.png"},{"name":"Amprex","category":"Primary","type":"Rifle","damage":22,"criticalChance":0.25,"criticalMultiplier":3.0,"procChance":0.25,"fireRate":14.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Amprex.png"},{"name":"Boltor","category":"Primary","type":"Rifle","damage":54,"criticalChance":0.05,"criticalMultiplier":1.5,"procChance":0.1,"fireRate":8.75,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Boltor.png"},{"name":"Boltor Prime","category":"Primary","type":"Rifle","damage":90,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.3,"fireRate":10.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Boltor_Prime.png"},{"name":"Braton","category":"Primary","type":"Rifle","damage":18,"criticalChance":0.1,"criticalMultiplier":1.5,"procChance":0.05,"fireRate":8.75,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Braton.png"},{"name":"Braton Prime","category":"Primary","type":"Rifle","damage":27,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":9.58,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Braton_Prime.png"},{"name":"Braton Vandal","category":"Primary","type":"Rifle","damage":23,"criticalChance":0.16,"criticalMultiplier":1.6,"procChance":0.16,"fireRate":9.17,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Braton_Vandal.png"},{"name":"Burston Prime","category":"Primary","type":"Rifle","damage":84,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":7.07,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Burston_Prime.png"},{"name":"Cernos Prime","category":"Primary","type":"Bow","damage":210,"criticalChance":0.3,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":1.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Cernos_Prime.png"},{"name":"Corinth Prime","category":"Primary","type":"Shotgun","damage":156,"criticalChance":0.22,"criticalMultiplier":2.2,"procChance":0.22,"fireRate":2.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Corinth_Prime.png"},{"name":"Dread","category":"Primary","type":"Bow","damage":175,"criticalChance":0.5,"criticalMultiplier":2.0,"procChance":0.05,"fireRate":1.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Dread.png"},{"name":"Felarx","category":"Primary","type":"Shotgun","damage":280,"criticalChance":0.28,"criticalMultiplier":2.4,"procChance":0.26,"fireRate":2.5,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Felarx.png"},{"name":"Fulmin","category":"Primary","type":"Rifle","damage":50,"criticalChance":0.21,"criticalMultiplier":2.3,"procChance":0.31,"fireRate":10.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Fulmin.png"},{"name":"Ignis Wraith","category":"Primary","type":"Rifle","damage":35,"criticalChance":0.17,"criticalMultiplier":1.5,"procChance":0.27,"fireRate":12.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ignis_Wraith.png"},{"name":"Karak","category":"Primary","type":"Rifle","damage":18,"criticalChance":0.05,"criticalMultiplier":1.5,"procChance":0.15,"fireRate":11.7,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Karak.png"},{"name":"Knell","category":"Primary","type":"Rifle","damage":50,"criticalChance":0.25,"criticalMultiplier":5.0,"procChance":0.05,"fireRate":2.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Knell.png"},{"name":"Kohm","category":"Primary","type":"Shotgun","damage":51,"criticalChance":0.17,"criticalMultiplier":2.2,"procChance":0.27,"fireRate":3.67,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kohm.png"},{"name":"Kuva Bramma","category":"Primary","type":"Bow","damage":232,"criticalChance":0.33,"criticalMultiplier":2.5,"procChance":0.37,"fireRate":1.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Bramma.png"},{"name":"Kuva Chakkhurr","category":"Primary","type":"Rifle","damage":350,"criticalChance":0.33,"criticalMultiplier":3.0,"procChance":0.13,"fireRate":1.5,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Chakkhurr.png"},{"name":"Kuva Kohm","category":"Primary","type":"Shotgun","damage":61,"criticalChance":0.17,"criticalMultiplier":2.2,"procChance":0.27,"fireRate":3.67,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Kohm.png"},{"name":"Kuva Ogris","category":"Primary","type":"Launcher","damage":400,"criticalChance":0.05,"criticalMultiplier":2.0,"procChance":0.5,"fireRate":2.08,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Ogris.png"},{"name":"Kuva Quartakk","category":"Primary","type":"Rifle","damage":68,"criticalChance":0.27,"criticalMultiplier":2.1,"procChance":0.23,"fireRate":5.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Quartakk.png"},{"name":"Kuva Sobek","category":"Primary","type":"Shotgun","damage":166,"criticalChance":0.15,"criticalMultiplier":1.5,"procChance":0.35,"fireRate":3.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Sobek.png"},{"name":"Kuva Tonkor","category":"Primary","type":"Launcher","damage":325,"criticalChance":0.25,"criticalMultiplier":3.0,"procChance":0.15,"fireRate":2.5,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Tonkor.png"},{"name":"Lanka","category":"Primary","type":"Sniper Rifle","damage":525,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.05,"fireRate":1.5,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Lanka.png"},{"name":"Latron Prime","category":"Primary","type":"Rifle","damage":112,"criticalChance":0.3,"criticalMultiplier":2.0,"procChance":0.15,"fireRate":5.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Latron_Prime.png"},{"name":"Ogris","category":"Primary","type":"Launcher","damage":350,"criticalChance":0.05,"criticalMultiplier":2.0,"procChance":0.5,"fireRate":2.08,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ogris.png"},{"name":"Paris Prime","category":"Primary","type":"Bow","damage":120,"criticalChance":0.4,"criticalMultiplier":2.0,"procChance":0.1,"fireRate":1.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Paris_Prime.png"},{"name":"Phantasma Prime","category":"Primary","type":"Shotgun","damage":240,"criticalChance":0.07,"criticalMultiplier":3.0,"procChance":0.5,"fireRate":4.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Phantasma_Prime.png"},{"name":"Prisma Grinlok","category":"Primary","type":"Rifle","damage":115,"criticalChance":0.3,"criticalMultiplier":2.5,"procChance":0.15,"fireRate":3.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Prisma_Grinlok.png"},{"name":"Rubico Prime","category":"Primary","type":"Sniper Rifle","damage":187,"criticalChance":0.38,"criticalMultiplier":2.8,"procChance":0.28,"fireRate":3.67,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rubico_Prime.png"},{"name":"Seer","category":"Primary","type":"Rifle","damage":50,"criticalChance":0.1,"criticalMultiplier":1.5,"procChance":0.1,"fireRate":2.08,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Seer.png"},{"name":"Shedu","category":"Primary","type":"Rifle","damage":78,"criticalChance":0.22,"criticalMultiplier":2.2,"procChance":0.28,"fireRate":5.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Shedu.png"},{"name":"Sicarus Prime","category":"Primary","type":"Rifle","damage":120,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":6.67,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Sicarus_Prime.png"},{"name":"Soma Prime","category":"Primary","type":"Rifle","damage":12,"criticalChance":0.3,"criticalMultiplier":3.0,"procChance":0.1,"fireRate":15.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Soma_Prime.png"},{"name":"Strun Wraith","category":"Primary","type":"Shotgun","damage":210,"criticalChance":0.15,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":2.17,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Strun_Wraith.png"},{"name":"Synoid Simulor","category":"Primary","type":"Rifle","damage":50,"criticalChance":0.05,"criticalMultiplier":2.0,"procChance":0.35,"fireRate":3.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Synoid_Simulor.png"},{"name":"Tenora Prime","category":"Primary","type":"Rifle","damage":32,"criticalChance":0.28,"criticalMultiplier":2.2,"procChance":0.28,"fireRate":19.07,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenora_Prime.png"},{"name":"Tenet Arca Plasmor","category":"Primary","type":"Shotgun","damage":560,"criticalChance":0.15,"criticalMultiplier":2.2,"procChance":0.25,"fireRate":1.67,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Arca_Plasmor.png"},{"name":"Tenet Ferrox","category":"Primary","type":"Rifle","damage":120,"criticalChance":0.25,"criticalMultiplier":2.2,"procChance":0.25,"fireRate":5.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Ferrox.png"},{"name":"Tenet Flux Rifle","category":"Primary","type":"Rifle","damage":29,"criticalChance":0.19,"criticalMultiplier":2.2,"procChance":0.39,"fireRate":20.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Flux_Rifle.png"},{"name":"Trumna","category":"Primary","type":"Rifle","damage":95,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":7.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Trumna.png"},{"name":"Vaykor Hek","category":"Primary","type":"Shotgun","damage":280,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":3.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vaykor_Hek.png"},{"name":"Vectis Prime","category":"Primary","type":"Sniper Rifle","damage":350,"criticalChance":0.35,"criticalMultiplier":2.0,"procChance":0.15,"fireRate":1.25,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vectis_Prime.png"},{"name":"Zarr","category":"Primary","type":"Launcher","damage":280,"criticalChance":0.15,"criticalMultiplier":2.5,"procChance":0.35,"fireRate":2.5,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Zarr.png"},{"name":"Zenith","category":"Primary","type":"Rifle","damage":28,"criticalChance":0.15,"criticalMultiplier":1.5,"procChance":0.2,"fireRate":7.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Zenith.png"},{"name":"Akbolto Prime","category":"Secondary","type":"Dual Pistols","damage":18,"criticalChance":0.25,"criticalMultiplier":2.5,"procChance":0.05,"fireRate":10.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Akbolto_Prime.png"},{"name":"Akjagara Prime","category":"Secondary","type":"Dual Pistols","damage":50,"criticalChance":0.28,"criticalMultiplier":2.0,"procChance":0.28,"fireRate":10.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Akjagara_Prime.png"},{"name":"Aksomati Prime","category":"Secondary","type":"Dual Pistols","damage":8,"criticalChance":0.26,"criticalMultiplier":3.0,"procChance":0.26,"fireRate":28.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Aksomati_Prime.png"},{"name":"Akstiletto Prime","category":"Secondary","type":"Dual Pistols","damage":15,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":20.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Akstiletto_Prime.png"},{"name":"Atomos","category":"Secondary","type":"Pistol","damage":20,"criticalChance":0.05,"criticalMultiplier":1.5,"procChance":0.5,"fireRate":8.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Atomos.png"},{"name":"Ballistica Prime","category":"Secondary","type":"Pistol","damage":100,"criticalChance":0.3,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":3.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Ballistica_Prime.png"},{"name":"Cedo","category":"Secondary","type":"Shotgun Sidearm","damage":84,"criticalChance":0.14,"criticalMultiplier":2.0,"procChance":0.5,"fireRate":4.17,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Cedo.png"},{"name":"Cycron","category":"Secondary","type":"Pistol","damage":42,"criticalChance":0.14,"criticalMultiplier":2.0,"procChance":0.36,"fireRate":6.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Cycron.png"},{"name":"Epitaph","category":"Secondary","type":"Pistol","damage":60,"criticalChance":0.18,"criticalMultiplier":2.4,"procChance":0.42,"fireRate":2.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Epitaph.png"},{"name":"Euphona Prime","category":"Secondary","type":"Shotgun Sidearm","damage":320,"criticalChance":0.2,"criticalMultiplier":3.0,"procChance":0.1,"fireRate":1.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Euphona_Prime.png"},{"name":"Knell Prime","category":"Secondary","type":"Pistol","damage":105,"criticalChance":0.35,"criticalMultiplier":2.0,"procChance":0.15,"fireRate":1.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Knell_Prime.png"},{"name":"Kuva Brakk","category":"Secondary","type":"Shotgun Sidearm","damage":114,"criticalChance":0.35,"criticalMultiplier":2.2,"procChance":0.27,"fireRate":3.33,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Brakk.png"},{"name":"Kuva Nukor","category":"Secondary","type":"Pistol","damage":31,"criticalChance":0.18,"criticalMultiplier":2.0,"procChance":0.5,"fireRate":8.33,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Nukor.png"},{"name":"Laetum","category":"Secondary","type":"Pistol","damage":52,"criticalChance":0.22,"criticalMultiplier":2.4,"procChance":0.42,"fireRate":4.17,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Laetum.png"},{"name":"Lato Prime","category":"Secondary","type":"Pistol","damage":56,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.1,"fireRate":7.5,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Lato_Prime.png"},{"name":"Marelok","category":"Secondary","type":"Pistol","damage":100,"criticalChance":0.15,"criticalMultiplier":2.0,"procChance":0.3,"fireRate":3.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Marelok.png"},{"name":"Pandero Prime","category":"Secondary","type":"Pistol","damage":72,"criticalChance":0.32,"criticalMultiplier":2.0,"procChance":0.32,"fireRate":8.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Pandero_Prime.png"},{"name":"Pyrana Prime","category":"Secondary","type":"Shotgun Sidearm","damage":130,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":5.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Pyrana_Prime.png"},{"name":"Rattleguts","category":"Secondary","type":"Pistol","damage":55,"criticalChance":0.21,"criticalMultiplier":2.2,"procChance":0.29,"fireRate":11.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rattleguts.png"},{"name":"Staticor","category":"Secondary","type":"Pistol","damage":150,"criticalChance":0.05,"criticalMultiplier":1.5,"procChance":0.45,"fireRate":2.0,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Staticor.png"},{"name":"Tenet Agendus","category":"Secondary","type":"Pistol","damage":440,"criticalChance":0.28,"criticalMultiplier":2.2,"procChance":0.28,"fireRate":1.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Agendus.png"},{"name":"Tenet Cycron","category":"Secondary","type":"Pistol","damage":27,"criticalChance":0.16,"criticalMultiplier":2.2,"procChance":0.44,"fireRate":6.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Cycron.png"},{"name":"Tenet Diplos","category":"Secondary","type":"Dual Pistols","damage":93,"criticalChance":0.29,"criticalMultiplier":2.2,"procChance":0.29,"fireRate":5.0,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Diplos.png"},{"name":"Tombfinger","category":"Secondary","type":"Pistol","damage":126,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":3.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tombfinger.png"},{"name":"Zakti Prime","category":"Secondary","type":"Pistol","damage":45,"criticalChance":0.05,"criticalMultiplier":1.5,"procChance":0.49,"fireRate":4.33,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Zakti_Prime.png"},{"name":"Broken War","category":"Melee","type":"Sword","damage":200,"criticalChance":0.15,"criticalMultiplier":1.5,"procChance":0.1,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Broken_War.png"},{"name":"Caustacyst","category":"Melee","type":"Scythe","damage":165,"criticalChance":0.15,"criticalMultiplier":1.5,"procChance":0.25,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Caustacyst.png"},{"name":"Cronus","category":"Melee","type":"Sword","damage":145,"criticalChance":0.1,"criticalMultiplier":1.5,"procChance":0.1,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Cronus.png"},{"name":"Dakra Prime","category":"Melee","type":"Sword","damage":175,"criticalChance":0.2,"criticalMultiplier":1.5,"procChance":0.15,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Dakra_Prime.png"},{"name":"Dokrahm","category":"Melee","type":"Heavy Blade","damage":275,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.24,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Dokrahm.png"},{"name":"Dual Ichor","category":"Melee","type":"Dual Swords","damage":100,"criticalChance":0.15,"criticalMultiplier":2.0,"procChance":0.35,"fireRate":1.17,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Dual_Ichor.png"},{"name":"Dual Keres Prime","category":"Melee","type":"Dual Swords","damage":196,"criticalChance":0.3,"criticalMultiplier":2.0,"procChance":0.3,"fireRate":1.08,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Dual_Keres_Prime.png"},{"name":"Galatine Prime","category":"Melee","type":"Heavy Blade","damage":250,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Galatine_Prime.png"},{"name":"Glaive Prime","category":"Melee","type":"Thrown","damage":105,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":1.25,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Glaive_Prime.png"},{"name":"Gram Prime","category":"Melee","type":"Heavy Blade","damage":310,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.25,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gram_Prime.png"},{"name":"Guandao Prime","category":"Melee","type":"Polearm","damage":220,"criticalChance":0.28,"criticalMultiplier":2.0,"procChance":0.22,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Guandao_Prime.png"},{"name":"Hate","category":"Melee","type":"Scythe","damage":160,"criticalChance":0.25,"criticalMultiplier":1.5,"procChance":0.15,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hate.png"},{"name":"Jat Kittag","category":"Melee","type":"Hammer","damage":220,"criticalChance":0.1,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":0.75,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Jat_Kittag.png"},{"name":"Kogake Prime","category":"Melee","type":"Fist","damage":200,"criticalChance":0.24,"criticalMultiplier":2.0,"procChance":0.24,"fireRate":1.083,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kogake_Prime.png"},{"name":"Kronen Prime","category":"Melee","type":"Tonfa","damage":242,"criticalChance":0.32,"criticalMultiplier":2.0,"procChance":0.22,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kronen_Prime.png"},{"name":"Kuva Shildeg","category":"Melee","type":"Hammer","damage":310,"criticalChance":0.23,"criticalMultiplier":2.2,"procChance":0.27,"fireRate":0.8,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Kuva_Shildeg.png"},{"name":"Lesion","category":"Melee","type":"Polearm","damage":167,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.3,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Lesion.png"},{"name":"Nikana Prime","category":"Melee","type":"Nikana","damage":220,"criticalChance":0.25,"criticalMultiplier":1.5,"procChance":0.15,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Nikana_Prime.png"},{"name":"Orthos Prime","category":"Melee","type":"Polearm","damage":155,"criticalChance":0.2,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Orthos_Prime.png"},{"name":"Paracesis","category":"Melee","type":"Heavy Blade","damage":280,"criticalChance":0.24,"criticalMultiplier":2.4,"procChance":0.28,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Paracesis.png"},{"name":"Redeemer Prime","category":"Melee","type":"Gunblade","damage":280,"criticalChance":0.3,"criticalMultiplier":2.0,"procChance":0.2,"fireRate":0.833,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Redeemer_Prime.png"},{"name":"Silva & Aegis Prime","category":"Melee","type":"Sword and Shield","damage":225,"criticalChance":0.25,"criticalMultiplier":2.0,"procChance":0.15,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Silva_&_Aegis_Prime.png"},{"name":"Skiajati","category":"Melee","type":"Nikana","damage":175,"criticalChance":0.18,"criticalMultiplier":2.0,"procChance":0.22,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Skiajati.png"},{"name":"Stropha","category":"Melee","type":"Gunblade","damage":504,"criticalChance":0.2,"criticalMultiplier":2.5,"procChance":0.2,"fireRate":0.667,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Stropha.png"},{"name":"Tatsu Prime","category":"Melee","type":"Two-Handed Nikana","damage":265,"criticalChance":0.24,"criticalMultiplier":2.0,"procChance":0.24,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tatsu_Prime.png"},{"name":"Tenet Exec","category":"Melee","type":"Heavy Blade","damage":330,"criticalChance":0.24,"criticalMultiplier":2.2,"procChance":0.28,"fireRate":0.917,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Exec.png"},{"name":"Tenet Livia","category":"Melee","type":"Two-Handed Nikana","damage":310,"criticalChance":0.28,"criticalMultiplier":2.2,"procChance":0.28,"fireRate":0.917,"masteryReq":5,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Tenet_Livia.png"},{"name":"Venka Prime","category":"Melee","type":"Claws","damage":168,"criticalChance":0.3,"criticalMultiplier":2.0,"procChance":0.3,"fireRate":1.083,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Venka_Prime.png"},{"name":"War","category":"Melee","type":"Heavy Blade","damage":350,"criticalChance":0.25,"criticalMultiplier":1.5,"procChance":0.1,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/War.png"},{"name":"Xoris","category":"Melee","type":"Thrown","damage":220,"criticalChance":0.24,"criticalMultiplier":2.0,"procChance":0.24,"fireRate":1.25,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Xoris.png"},{"name":"Zaw","category":"Melee","type":"Polearm","damage":200,"criticalChance":0.22,"criticalMultiplier":2.0,"procChance":0.22,"fireRate":0.917,"masteryReq":0,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Zaw.png"}],
+    mods: [{"name":"Vitality","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vitality.png"},{"name":"Redirection","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Redirection.png"},{"name":"Steel Fiber","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Steel_Fiber.png"},{"name":"Intensify","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Intensify.png"},{"name":"Continuity","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":2,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Continuity.png"},{"name":"Flow","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":2,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Flow.png"},{"name":"Stretch","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":2,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Stretch.png"},{"name":"Streamline","type":"Warframe","polarity":"Bar","rarity":"Common","baseDrain":2,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Streamline.png"},{"name":"Blind Rage","type":"Warframe","polarity":"Madurai","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Blind_Rage.png"},{"name":"Fleeting Expertise","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Fleeting_Expertise.png"},{"name":"Transient Fortitude","type":"Warframe","polarity":"Madurai","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Transient_Fortitude.png"},{"name":"Overextended","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Overextended.png"},{"name":"Narrow Minded","type":"Warframe","polarity":"Vazarin","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Narrow_Minded.png"},{"name":"Adaptation","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Adaptation.png"},{"name":"Rolling Guard","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":7,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rolling_Guard.png"},{"name":"Hunter Adrenaline","type":"Warframe","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hunter_Adrenaline.png"},{"name":"Primed Vigor","type":"Warframe","polarity":"Bar","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Vigor.png"},{"name":"Primed Continuity","type":"Warframe","polarity":"Bar","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Continuity.png"},{"name":"Primed Flow","type":"Warframe","polarity":"Bar","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Flow.png"},{"name":"Umbral Intensify","type":"Warframe","polarity":"Umbra","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Umbral_Intensify.png"},{"name":"Umbral Vitality","type":"Warframe","polarity":"Umbra","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Umbral_Vitality.png"},{"name":"Umbral Fiber","type":"Warframe","polarity":"Umbra","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Umbral_Fiber.png"},{"name":"Augur Reach","type":"Warframe","polarity":"Madurai","rarity":"Uncommon","baseDrain":2,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Augur_Reach.png"},{"name":"Augur Message","type":"Warframe","polarity":"Vazarin","rarity":"Uncommon","baseDrain":2,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Augur_Message.png"},{"name":"Constitution","type":"Warframe","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Constitution.png"},{"name":"Cunning Drift","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":5,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Cunning_Drift.png"},{"name":"Enemy Sense","type":"Warframe","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Enemy_Sense.png"},{"name":"Equilibrium","type":"Warframe","polarity":"Vazarin","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Equilibrium.png"},{"name":"Natural Talent","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Natural_Talent.png"},{"name":"Power Drift","type":"Warframe","polarity":"Madurai","rarity":"Rare","baseDrain":5,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Power_Drift.png"},{"name":"Quick Thinking","type":"Warframe","polarity":"Naramon","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Quick_Thinking.png"},{"name":"Rush","type":"Warframe","polarity":"Naramon","rarity":"Common","baseDrain":2,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rush.png"},{"name":"Second Wind","type":"Warframe","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Second_Wind.png"},{"name":"Sprint Boost","type":"Warframe","polarity":"Naramon","rarity":"Common","baseDrain":2,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Sprint_Boost.png"},{"name":"Rage","type":"Warframe","polarity":"Madurai","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rage.png"},{"name":"Primed Sure Footed","type":"Warframe","polarity":"Vazarin","rarity":"Legendary","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Sure_Footed.png"},{"name":"Serration","type":"Primary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Serration.png"},{"name":"Split Chamber","type":"Primary","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Split_Chamber.png"},{"name":"Point Strike","type":"Primary","polarity":"Madurai","rarity":"Common","baseDrain":2,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Point_Strike.png"},{"name":"Vital Sense","type":"Primary","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vital_Sense.png"},{"name":"Hellfire","type":"Primary","polarity":"Madurai","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hellfire.png"},{"name":"Infected Clip","type":"Primary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Infected_Clip.png"},{"name":"Stormbringer","type":"Primary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Stormbringer.png"},{"name":"Cryo Rounds","type":"Primary","polarity":"Vazarin","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Cryo_Rounds.png"},{"name":"Heavy Caliber","type":"Primary","polarity":"Madurai","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Heavy_Caliber.png"},{"name":"Hunter Munitions","type":"Primary","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":7,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hunter_Munitions.png"},{"name":"Primed Shred","type":"Primary","polarity":"Naramon","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Shred.png"},{"name":"Galvanized Aptitude","type":"Primary","polarity":"Bar","rarity":"Rare","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Galvanized_Aptitude.png"},{"name":"Galvanized Chamber","type":"Primary","polarity":"Bar","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Galvanized_Chamber.png"},{"name":"Galvanized Scope","type":"Primary","polarity":"Madurai","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Galvanized_Scope.png"},{"name":"Rime Rounds","type":"Primary","polarity":"Vazarin","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rime_Rounds.png"},{"name":"Thermite Rounds","type":"Primary","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Thermite_Rounds.png"},{"name":"High Voltage","type":"Primary","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/High_Voltage.png"},{"name":"Malignant Force","type":"Primary","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Malignant_Force.png"},{"name":"Vigilante Armaments","type":"Primary","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vigilante_Armaments.png"},{"name":"Primed Rifle Ammo","type":"Primary","polarity":"Bar","rarity":"Legendary","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Rifle_Ammo.png"},{"name":"Bane of Grineer","type":"Primary","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Bane_of_Grineer.png"},{"name":"Bane of Corpus","type":"Primary","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Bane_of_Corpus.png"},{"name":"Bane of Infested","type":"Primary","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Bane_of_Infested.png"},{"name":"Rifle Aptitude","type":"Primary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Rifle_Aptitude.png"},{"name":"Speed Trigger","type":"Primary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Speed_Trigger.png"},{"name":"Vile Acceleration","type":"Primary","polarity":"Naramon","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vile_Acceleration.png"},{"name":"Shred","type":"Primary","polarity":"Naramon","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Shred.png"},{"name":"Hornet Strike","type":"Secondary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hornet_Strike.png"},{"name":"Barrel Diffusion","type":"Secondary","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Barrel_Diffusion.png"},{"name":"Lethal Torrent","type":"Secondary","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Lethal_Torrent.png"},{"name":"Pistol Gambit","type":"Secondary","polarity":"Madurai","rarity":"Common","baseDrain":2,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Pistol_Gambit.png"},{"name":"Target Cracker","type":"Secondary","polarity":"Madurai","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Target_Cracker.png"},{"name":"Convulsion","type":"Secondary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Convulsion.png"},{"name":"Pathogen Rounds","type":"Secondary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Pathogen_Rounds.png"},{"name":"Deep Freeze","type":"Secondary","polarity":"Vazarin","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Deep_Freeze.png"},{"name":"Primed Heated Charge","type":"Secondary","polarity":"Madurai","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Heated_Charge.png"},{"name":"Galvanized Diffusion","type":"Secondary","polarity":"Bar","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Galvanized_Diffusion.png"},{"name":"Galvanized Shot","type":"Secondary","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Galvanized_Shot.png"},{"name":"Primed Pistol Gambit","type":"Secondary","polarity":"Madurai","rarity":"Legendary","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Pistol_Gambit.png"},{"name":"Primed Target Cracker","type":"Secondary","polarity":"Madurai","rarity":"Legendary","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Target_Cracker.png"},{"name":"Frostbite","type":"Secondary","polarity":"Vazarin","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Frostbite.png"},{"name":"Jolt","type":"Secondary","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Jolt.png"},{"name":"Hollow Point","type":"Secondary","polarity":"Naramon","rarity":"Common","baseDrain":2,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Hollow_Point.png"},{"name":"Pistol Pestilence","type":"Secondary","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Pistol_Pestilence.png"},{"name":"Scorch","type":"Secondary","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Scorch.png"},{"name":"Shocking Touch","type":"Secondary","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Shocking_Touch.png"},{"name":"Augmented Quiver","type":"Secondary","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Augmented_Quiver.png"},{"name":"Pressure Point","type":"Melee","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Pressure_Point.png"},{"name":"Fury","type":"Melee","polarity":"Naramon","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Fury.png"},{"name":"True Steel","type":"Melee","polarity":"Madurai","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/True_Steel.png"},{"name":"Organ Shatter","type":"Melee","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Organ_Shatter.png"},{"name":"Reach","type":"Melee","polarity":"Naramon","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Reach.png"},{"name":"Fever Strike","type":"Melee","polarity":"Bar","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Fever_Strike.png"},{"name":"Molten Impact","type":"Melee","polarity":"Madurai","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Molten_Impact.png"},{"name":"North Wind","type":"Melee","polarity":"Vazarin","rarity":"Common","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/North_Wind.png"},{"name":"Primed Pressure Point","type":"Melee","polarity":"Bar","rarity":"Legendary","baseDrain":6,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Pressure_Point.png"},{"name":"Berserker Fury","type":"Melee","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Berserker_Fury.png"},{"name":"Blood Rush","type":"Melee","polarity":"Naramon","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Blood_Rush.png"},{"name":"Weeping Wounds","type":"Melee","polarity":"Vazarin","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Weeping_Wounds.png"},{"name":"Primed Reach","type":"Melee","polarity":"Naramon","rarity":"Legendary","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Primed_Reach.png"},{"name":"Condition Overload","type":"Melee","polarity":"Bar","rarity":"Rare","baseDrain":6,"fusionLimit":3,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Condition_Overload.png"},{"name":"Gladiator Might","type":"Melee","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Gladiator_Might.png"},{"name":"Killing Blow","type":"Melee","polarity":"Madurai","rarity":"Common","baseDrain":4,"fusionLimit":10,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Killing_Blow.png"},{"name":"Drifting Contact","type":"Melee","polarity":"Naramon","rarity":"Uncommon","baseDrain":4,"fusionLimit":7,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Drifting_Contact.png"},{"name":"Body Count","type":"Melee","polarity":"Bar","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Body_Count.png"},{"name":"Spoiled Strike","type":"Melee","polarity":"Bar","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Spoiled_Strike.png"},{"name":"Amalgam Organ Shatter","type":"Melee","polarity":"Bar","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Amalgam_Organ_Shatter.png"},{"name":"Life Strike","type":"Melee","polarity":"Vazarin","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Life_Strike.png"},{"name":"Corrupt Charge","type":"Melee","polarity":"Madurai","rarity":"Rare","baseDrain":6,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Corrupt_Charge.png"},{"name":"Shattering Impact","type":"Melee","polarity":"Bar","rarity":"Rare","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Shattering_Impact.png"},{"name":"Vicious Frost","type":"Melee","polarity":"Vazarin","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Vicious_Frost.png"},{"name":"Volcanic Edge","type":"Melee","polarity":"Madurai","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Volcanic_Edge.png"},{"name":"Shocking Touch","type":"Melee","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Shocking_Touch.png"},{"name":"Virulent Scourge","type":"Melee","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Virulent_Scourge.png"},{"name":"Collision Force","type":"Melee","polarity":"Bar","rarity":"Uncommon","baseDrain":4,"fusionLimit":5,"tradable":true,"wikiaThumbnail":"https://warframe.fandom.com/wiki/Special:Redirect/file/Collision_Force.png"}]
+  };
+  window._usingStaticData = true;
+})();
+
+</script>
+
+<!-- ═══════════════════ ASYNC DATA LOADER ═══════════════════ -->
+<script>
+(function() {
+  var s = document.createElement('script');
+  s.src = 'tennoframe_data.js';
+  s.async = true;
+  document.head.appendChild(s);
+})();
+</script>
+
+<!-- ═══════════════════ APP ═══════════════════ -->
+<script>
+'use strict';
+
+// ── CONFIG ──────────────────────────────────────────────────
+const FIREBASE_DB_URL = 'YOUR_FIREBASE_DB_URL_HERE';
+const FIREBASE_READY  = FIREBASE_DB_URL !== 'YOUR_FIREBASE_DB_URL_HERE' && FIREBASE_DB_URL.startsWith('https://');
+const API      = 'https://api.warframestat.us';
+const DROPS_API= 'https://drops.warframestat.us/data/all.json';
+const CDN      = 'https://cdn.warframestat.us/img/';
+const CACHE_VER= '3.0';
+const CACHE_TTL= 6 * 60 * 60 * 1000;
+
+// ── STATE ────────────────────────────────────────────────────
+let allWarframes=[], allPrimary=[], allSecondary=[], allMelee=[], allMods=[];
+let dropsData={}, dropsLoaded=false;
+let currentPage='warframes', currentSearch='', currentSort='az';
+let prFilter='', seFilter='', meFilter='', moFilter='';
+let trackerLoaded=false, patchLoaded=false;
+let tierCat='warframes', tierVotes={};
+let cmpA=null, cmpB=null;
+let selectedStar=0;
+const loaded={warframes:false, weapons:false, mods:false};
+let imgObserver=null;
+
+// ── LOCAL STORE ──────────────────────────────────────────────
+const LS = {
+  get(k){ try{ return JSON.parse(localStorage.getItem('tf_'+k)||'null'); }catch{ return null; } },
+  set(k,v){ try{ localStorage.setItem('tf_'+k,JSON.stringify(v)); }catch{} }
+};
+
+// ── CACHE ────────────────────────────────────────────────────
+function cacheGet(key) {
+  try {
+    if(LS.get('cache_ver') !== CACHE_VER) { sessionStorage.clear(); LS.set('cache_ver',CACHE_VER); return null; }
+    const raw = sessionStorage.getItem('tfc_'+key);
+    if(!raw) return null;
+    const {ts, data} = JSON.parse(raw);
+    if(Date.now()-ts > CACHE_TTL) { sessionStorage.removeItem('tfc_'+key); return null; }
+    return data;
+  } catch{ return null; }
+}
+function cacheSet(key, data) {
+  try { sessionStorage.setItem('tfc_'+key, JSON.stringify({ts:Date.now(), data})); } catch{}
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+let toastTimer=null;
+function toast(msg, done=false) {
+  const el=document.getElementById('tf-toast');
+  const spin=document.getElementById('toast-spin');
+  const txt=document.getElementById('toast-txt');
+  if(!el) return;
+  txt.textContent=msg;
+  spin.style.display=done?'none':'block';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  if(done) toastTimer=setTimeout(()=>el.classList.remove('show'), 2000);
+}
+function toastHide() {
+  const el=document.getElementById('tf-toast');
+  if(el) { clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),500); }
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+function esc(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function dedupe(arr){ const seen=new Set(); return arr.filter(x=>{ if(seen.has(x.name)) return false; seen.add(x.name); return true; }); }
+function sortList(arr, mode) {
+  const a=[...arr];
+  if(mode==='za') a.sort((x,y)=>y.name.localeCompare(x.name));
+  else if(mode==='popular') a.sort((x,y)=>(y.masteryReq||0)-(x.masteryReq||0));
+  else if(mode==='top_rated') {
+    a.sort((x,y)=>{
+      const ra=LS.get('reviews_'+x.name.toLowerCase());
+      const rb=LS.get('reviews_'+y.name.toLowerCase());
+      const avgA=ra&&ra.length?ra.reduce((s,r)=>s+r.rating,0)/ra.length:0;
+      const avgB=rb&&rb.length?rb.reduce((s,r)=>s+r.rating,0)/rb.length:0;
+      return avgB-avgA;
+    });
+  }
+  else a.sort((x,y)=>x.name.localeCompare(y.name));
+  return a;
+}
+function getDamage(w) {
+  if(!w) return null;
+  // Prefer pre-computed totalDamage (always a clean number)
+  if(typeof w.totalDamage === 'number' && w.totalDamage > 0) return w.totalDamage;
+  const d = w.damage;
+  if(typeof d === 'number' && d > 0) return d;
+  if(typeof d === 'object' && d !== null) {
+    // API returns {total:525, electricity:525} — use explicit total key if present
+    if(typeof d.total === 'number' && d.total > 0) return d.total;
+    // Otherwise sum individual damage type values (exclude non-numeric)
+    const sum = Object.entries(d).reduce((s,[,v])=>s+(typeof v==='number'?v:0), 0);
+    return sum > 0 ? Math.round(sum * 10) / 10 : null;
+  }
+  return null;
+}
+function itemImg(item) {
+  if(!item) return '';
+  if(item.wikiaThumbnail) return item.wikiaThumbnail;
+  if(item.imageName) return CDN+item.imageName;
+  if(item.uniqueName) {
+    const slug=item.uniqueName.split('/').pop().toLowerCase().replace(/[^a-z0-9]/g,'-');
+    return CDN+slug+'.png';
+  }
+  return '';
+}
+
+// ── FETCH ────────────────────────────────────────────────────
+async function apiFetch(url, cacheKey) {
+  const cached=cacheGet(cacheKey);
+  if(cached) return cached;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const data=await res.json();
+  cacheSet(cacheKey, data);
+  return data;
+}
+
+// ── IMG LAZY OBSERVER ─────────────────────────────────────────
+function initImgObserver() {
+  if(imgObserver) { imgObserver.disconnect(); imgObserver=null; }
+  imgObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      const el=e.target, src=el.dataset.src;
+      if(!src) return;
+      imgObserver.unobserve(el);
+      const ini=el.dataset.ini||'';
+      const img=document.createElement('img');
+      img.onerror=()=>{ el.innerHTML='<div class="wf-card-img-placeholder">'+ini+'</div>'; };
+      img.onload=()=>{ el.innerHTML=''; el.appendChild(img); };
+      img.alt='';
+      img.src=src;
+    });
+  },{rootMargin:'150px',threshold:0});
+  document.querySelectorAll('[data-src]').forEach(el=>imgObserver.observe(el));
+}
+
+// ── DROPS ─────────────────────────────────────────────────────
+async function loadDrops() {
+  if(dropsLoaded) return;
+  try {
+    const data=await apiFetch(DROPS_API,'drops');
+    if(data && data.length) {
+      dropsLoaded=true;
+      data.forEach(row => {
+        const key=(row.item||'').toLowerCase();
+        if(!key) return;
+        if(!dropsData[key]) dropsData[key]=[];
+        dropsData[key].push({location:row.place, rotation:row.rotation, chance:row.chance||0, rarity:row.rarity, matchedKey:key});
+      });
+    }
+  } catch{}
+}
+function lookupDrops(name) {
+  if(!dropsLoaded) return [];
+  const key=name.toLowerCase();
+  let results=dropsData[key]||[];
+  if(!results.length) {
+    const words=key.split(' ').filter(w=>w.length>3);
+    for(const k of Object.keys(dropsData)) {
+      if(words.every(w=>k.includes(w))) { results=dropsData[k]; break; }
+    }
+  }
+  return results.slice(0,12);
+}
+function dropsHtml(name) {
+  const drops=lookupDrops(name);
+  if(!drops.length) return '<div class="no-drops">No drop data found. <a href="https://warframe.fandom.com/wiki/'+encodeURIComponent(name)+'" target="_blank" rel="noopener">Check Wiki ↗</a></div>';
+  return '<div class="drop-list">'+drops.map(d=>{
+    const pct=(d.chance*100).toFixed(2)+'%';
+    const rc=d.chance>0.1?'common':d.chance>0.03?'uncommon':'rare';
+    return '<div class="drop-item"><div class="drop-location">'+escHtml(d.location)+(d.rotation?'<small>Rotation '+d.rotation+'</small>':'')+'</div><span class="drop-chance '+rc+'">'+pct+'<span class="drop-rarity-badge">'+escHtml(d.rarity||rc)+'</span></span></div>';
+  }).join('')+'</div>';
+}
+
+// ── RATINGS ──────────────────────────────────────────────────
+function getReviews(name){ return LS.get('reviews_'+name.toLowerCase())||[]; }
+function saveReview(name,review){ const r=getReviews(name); r.push(review); LS.set('reviews_'+name.toLowerCase(),r); }
+function ratingsHtml(name) {
+  const reviews=getReviews(name);
+  if(!reviews.length) return '<div style="color:var(--text-dim);font-size:12px">No reviews yet. Be the first!</div>';
+  const avg=reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
+  const counts=[1,2,3,4,5].map(n=>reviews.filter(r=>r.rating===n).length);
+  const bars=counts.map((c,i)=>'<div class="rating-bar-row"><span class="rating-bar-label">'+(i+1)+'</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:'+(reviews.length?Math.round(c/reviews.length*100):0)+'%"></div></div><span class="rating-bar-count">'+c+'</span></div>').reverse().join('');
+  const cards=reviews.slice().reverse().slice(0,5).map(r=>'<div class="review-card"><div class="review-header"><span class="review-author">'+escHtml(r.author||'Anonymous')+'</span><span class="review-stars">'+'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)+'</span><span class="review-date">'+new Date(r.timestamp).toLocaleDateString()+'</span></div>'+(r.text?'<div class="review-text">'+escHtml(r.text)+'</div>':'')+'</div>').join('');
+  return '<div class="reviews-summary"><div class="reviews-avg">'+avg.toFixed(1)+'</div><div class="reviews-bars">'+bars+'</div></div>'+cards;
+}
+function miniStarsHtml(avg) {
+  const full=Math.floor(avg), half=avg-full>=0.5;
+  return '★'.repeat(full)+(half?'½':'')+'☆'.repeat(5-full-(half?1:0));
+}
+function reviewFormHtml(itemName) {
+  return '<div class="review-form" id="review-form"><div class="star-row" id="star-row">'+[1,2,3,4,5].map(n=>'<button class="star-btn" onclick="setStar('+n+')" id="star-'+n+'">☆</button>').join('')+'</div><input id="rv-author" placeholder="Your name (optional)"><textarea id="rv-text" placeholder="Share your thoughts…" rows="3"></textarea><button class="submit-review-btn" onclick="submitReview(\''+esc(itemName)+'\')">SUBMIT REVIEW</button></div>';
+}
+
+let reviewTarget='';
+function setStar(n) {
+  selectedStar=n;
+  for(let i=1;i<=5;i++) { const b=document.getElementById('star-'+i); if(b) b.textContent=i<=n?'★':'☆'; }
+}
+function submitReview(name) {
+  if(!selectedStar){ alert('Please select a star rating.'); return; }
+  const author=document.getElementById('rv-author')?.value.trim()||'Anonymous';
+  const text=document.getElementById('rv-text')?.value.trim()||'';
+  saveReview(name,{rating:selectedStar,author,text,timestamp:Date.now()});
+  selectedStar=0;
+  // Refresh reviews section
+  const rl=document.getElementById('reviews-list');
+  if(rl) rl.innerHTML=ratingsHtml(name);
+  const rf=document.getElementById('review-form');
+  if(rf) rf.innerHTML='<div style="color:var(--accent3);font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:1px;padding:8px 0">REVIEW SUBMITTED — THANK YOU!</div>';
+  // Update mini stars on card
+  updateMiniStars(name);
+}
+function updateMiniStars(name) {
+  const reviews=getReviews(name);
+  if(!reviews.length) return;
+  const avg=reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
+  document.querySelectorAll('[data-item-name]').forEach(card=>{
+    if(card.dataset.itemName===name.toLowerCase()) {
+      const ms=card.querySelector('.mini-stars');
+      const rt=card.querySelector('.mini-rating-txt');
+      if(ms) ms.textContent=miniStarsHtml(avg);
+      if(rt) rt.textContent=avg.toFixed(1)+' ('+reviews.length+')';
+    }
+  });
+}
+
+// ── RECOMMENDED BUILDS ────────────────────────────────────────
+const BUILD_MODS = {
+  warframe_beginner: ['Vitality','Redirection','Steel Fiber','Intensify','Continuity','Flow','Stretch','Streamline'],
+  warframe_steel: ['Primed Vigor','Umbral Intensify','Blind Rage','Transient Fortitude','Primed Continuity','Primed Flow','Augur Reach','Fleeting Expertise'],
+  primary_beginner: ['Serration','Split Chamber','Point Strike','Vital Sense','Hellfire','Infected Clip','Stormbringer','Cryo Rounds'],
+  primary_steel: ['Primed Shred','Galvanized Chamber','Hunter Munitions','Vital Sense','Rime Rounds','Thermite Rounds','Malignant Force','High Voltage'],
+  secondary_beginner: ['Hornet Strike','Barrel Diffusion','Lethal Torrent','Pistol Gambit','Target Cracker','Convulsion','Pathogen Rounds','Deep Freeze'],
+  secondary_steel: ['Primed Heated Charge','Galvanized Diffusion','Galvanized Shot','Primed Pistol Gambit','Primed Target Cracker','Frostbite','Rime Rounds','Jolt'],
+  melee_beginner: ['Pressure Point','Fury','True Steel','Organ Shatter','Reach','Fever Strike','Molten Impact','North Wind'],
+  melee_steel: ['Primed Pressure Point','Berserker Fury','Blood Rush','Weeping Wounds','Primed Reach','Condition Overload','Organ Shatter','Primed Fever Strike'],
+};
+function buildsHtml(type) {
+  const t=type.toLowerCase();
+  const cat=t.includes('warframe')||t==='warframe'?'warframe':allPrimary.find(w=>w.name.toLowerCase()===t)?'primary':allSecondary.find(w=>w.name.toLowerCase()===t)?'secondary':'melee';
+  const bg=BUILD_MODS[cat+'_beginner']||BUILD_MODS.warframe_beginner;
+  const sp=BUILD_MODS[cat+'_steel']||BUILD_MODS.warframe_steel;
+  function chips(mods){ return mods.map(m=>'<span class="mod-chip" onclick="openModByName(\''+esc(m)+'\',event)" onmouseenter="showModPreview(\''+esc(m)+'\',event)" onmouseleave="hideModPreview()">'+escHtml(m)+'</span>').join(''); }
+  return '<div class="builds-grid"><div class="build-card"><div class="build-card-title beginner">★ BEGINNER BUILD</div><div class="build-mods">'+chips(bg)+'</div></div><div class="build-card"><div class="build-card-title advanced">☠ STEEL PATH BUILD</div><div class="build-mods">'+chips(sp)+'</div></div></div>';
+}
+
+// ── MOD PREVIEW POPUP ─────────────────────────────────────────
+let previewTimer=null;
+function showModPreview(name, e) {
+  clearTimeout(previewTimer);
+  previewTimer=setTimeout(()=>{
+    const mod=allMods.find(m=>m.name.toLowerCase()===name.toLowerCase());
+    if(!mod) return;
+    const src=itemImg(mod);
+    if(!src) return;
+    const popup=document.getElementById('mod-preview-popup');
+    const img=document.getElementById('mod-preview-img');
+    img.src=src;
+    popup.style.display='block';
+    const x=Math.min(e.clientX+12, window.innerWidth-140);
+    const y=Math.min(e.clientY+12, window.innerHeight-140);
+    popup.style.left=x+'px'; popup.style.top=y+'px';
+  },120);
+}
+function hideModPreview(){ clearTimeout(previewTimer); const p=document.getElementById('mod-preview-popup'); if(p) p.style.display='none'; }
+
+// ── AUGMENTS ──────────────────────────────────────────────────
+function getAugments(name) {
+  const full = name.toLowerCase().trim();
+  // Strip variant suffixes so e.g. "Saryn Prime" finds Saryn's augments
+  const base = full.replace(/ prime$/, '').replace(/ umbra$/, '').replace(/ wraith$/, '').replace(/ vandal$/, '').replace(/ kuva$/, '').replace(/ tenet$/, '').trim();
+  // Generic category strings that are NOT item names
+  const generic = new Set(['warframe','primary','secondary','melee','companion','robotic','archwing','k-drive','sentinel','beast','exalted','rifle','pistol','shotgun','bow','sniper','launcher','']);
+  return allMods.filter(m => {
+    // Python-trimmed data: m.type = compatName (e.g. "Saryn")
+    // Raw live-API data:   m.compatName = "Saryn", m.type = "Warframe"
+    // So we must check BOTH fields
+    const t = (m.type||'').toLowerCase().trim();
+    const compat = (m.compatName||'').toLowerCase().trim();
+    const tMatch  = !generic.has(t)      && (t === full      || t === base);
+    const cMatch  = !generic.has(compat) && (compat === full || compat === base);
+    return tMatch || cMatch;
+  });
+}
+function augmentsHtml(name) {
+  const augments = getAugments(name);
+  if(!augments.length) return '<div style="font-size:12px;color:var(--text-dim);padding:4px 0">No augment mods found for this item.</div>';
+  return augments.map(m => {
+    const maxStats = m.levelStats && m.levelStats.length ? m.levelStats[m.levelStats.length-1].stats : [];
+    const effect = maxStats.length ? maxStats.join(' · ') : 'Open mod for full details';
+    const src = itemImg(m);
+    const iconHtml = src ? '<img src="'+src+'" style="width:100%;height:100%;object-fit:contain" loading="lazy" onerror="this.style.display=\'none\'">' : '';
+    return '<div class="ability" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer" onclick="openModModal(\''+esc(m.name)+'\')" onmouseenter="showModPreview(\''+esc(m.name)+'\',event)" onmouseleave="hideModPreview()"><div style="width:38px;height:38px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center">'+iconHtml+'</div><div style="flex:1;min-width:0"><div class="ability-name" style="display:flex;align-items:center;gap:6px">'+escHtml(m.name)+'<span style="font-size:9px;font-family:\'Share Tech Mono\',monospace;color:var(--text-dim);background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:1px 4px">'+escHtml(m.rarity||'')+'</span></div><div class="ability-desc">'+escHtml(effect)+'</div></div></div>';
+  }).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function openModal(){ document.getElementById('modal-overlay').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); document.body.style.overflow=''; selectedStar=0; }
+
+// ── WARFRAME MODAL ────────────────────────────────────────────
+function openWfModal(name) {
+  const w=allWarframes.find(x=>x.name===name); if(!w) return;
+  const src=itemImg(w);
+  const imgHtml=src?'<img class="modal-img" src="'+src+'" alt="'+escHtml(name)+'" loading="lazy">':'<div class="modal-img-placeholder">'+name.substring(0,2).toUpperCase()+'</div>';
+  const abilities=(w.abilities||[]).map(a=>{
+    const vidUrl='https://www.youtube.com/results?search_query='+encodeURIComponent(w.name+' '+a.name+' warframe ability showcase');
+    return '<div class="ability"><div class="ability-name" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>'+escHtml(a.name)+'</span><a href="'+vidUrl+'" target="_blank" rel="noopener" style="font-size:9px;font-family:\'Share Tech Mono\',monospace;color:var(--accent2);border:1px solid var(--accent2);border-radius:2px;padding:2px 7px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:background .15s" onmouseover="this.style.background=\'rgba(255,107,26,.12)\'" onmouseout="this.style.background=\'\'">▶ WATCH</a></div><div class="ability-desc">'+escHtml(a.description)+'</div></div>';
+  }).join('');
+  const reviews=getReviews(name); const avg=reviews.length?reviews.reduce((s,r)=>s+r.rating,0)/reviews.length:0;
+  document.getElementById('modal-content').innerHTML=
+    '<div class="modal-top">'+imgHtml+'<div><div class="modal-title">'+escHtml(name)+'</div><div class="modal-subtitle">WARFRAME</div><div class="modal-stats"><div class="modal-stat"><span class="modal-stat-label">HEALTH</span><span class="modal-stat-val">'+(w.health||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">SHIELD</span><span class="modal-stat-val">'+(w.shield||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">ARMOR</span><span class="modal-stat-val">'+(w.armor||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">ENERGY</span><span class="modal-stat-val">'+(w.power||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">MR REQ</span><span class="modal-stat-val">'+(w.masteryReq||0)+'</span></div></div></div></div>'+
+    (abilities?'<div class="modal-section-title">Abilities</div>'+abilities:'')+
+    '<div class="modal-section-title">Augment Mods</div>'+augmentsHtml(name)+
+    '<div class="modal-section-title">Recommended Builds</div>'+buildsHtml('warframe')+
+    '<div class="modal-section-title">Drop Locations</div>'+dropsHtml(name)+
+    '<div class="modal-section-title">Community Reviews</div><div id="reviews-list">'+ratingsHtml(name)+'</div>'+reviewFormHtml(name);
+  openModal();
+}
+
+// ── WEAPON MODAL ──────────────────────────────────────────────
+function openWeaponModal(name, cat) {
+  const arr=cat==='primary'?allPrimary:cat==='secondary'?allSecondary:allMelee;
+  const w=arr.find(x=>x.name===name); if(!w) return;
+  const src=itemImg(w);
+  const imgHtml=src?'<img class="modal-img" src="'+src+'" alt="'+escHtml(name)+'" loading="lazy" style="object-fit:contain">':'<div class="modal-img-placeholder">'+name.substring(0,2).toUpperCase()+'</div>';
+  const wDmg=getDamage(w);
+  const dmg=w.damageTypes&&Object.keys(w.damageTypes).length?Object.entries(w.damageTypes).map(([t,v])=>'<div class="modal-stat"><span class="modal-stat-label">'+escHtml(t.toUpperCase())+'</span><span class="modal-stat-val">'+(typeof v==='number'?v:getDamage({damage:v})||v)+'</span></div>').join(''):'';
+  document.getElementById('modal-content').innerHTML=
+    '<div class="modal-top">'+imgHtml+'<div><div class="modal-title">'+escHtml(name)+'</div><div class="modal-subtitle">'+cat.toUpperCase()+' — '+(w.type||'').toUpperCase()+'</div><div class="modal-stats"><div class="modal-stat"><span class="modal-stat-label">DAMAGE</span><span class="modal-stat-val">'+(wDmg||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">CRIT %</span><span class="modal-stat-val">'+(w.criticalChance?Math.round(w.criticalChance*100)+'%':'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">CRIT MULT</span><span class="modal-stat-val">'+(w.criticalMultiplier?w.criticalMultiplier+'x':'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">STATUS</span><span class="modal-stat-val">'+(w.procChance?Math.round(w.procChance*100)+'%':'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">FIRE RATE</span><span class="modal-stat-val">'+(w.fireRate||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">MR REQ</span><span class="modal-stat-val">'+(w.masteryReq||0)+'</span></div></div></div></div>'+
+    (dmg?'<div class="modal-section-title">Damage Types</div><div class="modal-stats">'+dmg+'</div>':'')+
+    '<div class="modal-section-title">Augment Mods</div>'+augmentsHtml(name)+
+    '<div class="modal-section-title">Recommended Builds</div>'+buildsHtml(cat)+
+    '<div class="modal-section-title">Drop Locations</div>'+dropsHtml(name)+
+    '<div class="modal-section-title">Community Reviews</div><div id="reviews-list">'+ratingsHtml(name)+'</div>'+reviewFormHtml(name);
+  openModal();
+}
+
+// ── MOD MODAL ─────────────────────────────────────────────────
+function openModModal(name) {
+  const m=allMods.find(x=>x.name===name); if(!m) return;
+  const src=itemImg(m);
+  const imgHtml=src?'<img class="modal-img" src="'+src+'" alt="'+escHtml(name)+'" loading="lazy" style="object-fit:contain">':'<div class="modal-img-placeholder">'+name.substring(0,2).toUpperCase()+'</div>';
+  const stats=(m.levelStats&&m.levelStats.length)?m.levelStats[m.levelStats.length-1].stats.map(s=>'<div style="font-size:13px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)">'+escHtml(s)+'</div>').join(''):'<div style="font-size:12px;color:var(--text-dim)">No stat data available.</div>';
+  document.getElementById('modal-content').innerHTML=
+    '<div class="modal-top">'+imgHtml+'<div><div class="modal-title">'+escHtml(name)+'</div><div class="modal-subtitle">'+(m.type||'').toUpperCase()+' MOD</div><div class="modal-stats"><div class="modal-stat"><span class="modal-stat-label">RARITY</span><span class="modal-stat-val" style="font-size:12px">'+(m.rarity||'?')+'</span></div><div class="modal-stat"><span class="modal-stat-label">MAX RANK</span><span class="modal-stat-val">'+(m.fusionLimit||0)+'</span></div><div class="modal-stat"><span class="modal-stat-label">DRAIN</span><span class="modal-stat-val">'+(m.baseDrain||0)+'</span></div><div class="modal-stat"><span class="modal-stat-label">POLARITY</span><span class="modal-stat-val" style="font-size:12px">'+(m.polarity||'?')+'</span></div></div></div></div>'+
+    '<div class="modal-section-title">Max Rank Effects</div>'+stats+
+    '<div class="modal-section-title">Drop Locations</div>'+dropsHtml(name);
+  openModal();
+}
+
+// ── MOD DEEP-LINK ─────────────────────────────────────────────
+function openModByName(name, event) {
+  if(event){ event.stopPropagation(); }
+  const q=name.replace(/\s*[\(\[].*?[\)\]]/g,'').trim().toLowerCase();
+  let mod=allMods.find(m=>m.name.toLowerCase()===q)
+          ||allMods.find(m=>m.name.toLowerCase().startsWith(q))
+          ||allMods.find(m=>m.name.toLowerCase().includes(q));
+  if(!mod){
+    const words=q.split(/\s+/).filter(w=>w.length>2);
+    mod=allMods.find(m=>words.every(w=>m.name.toLowerCase().includes(w)));
+  }
+  closeModal();
+  setPage('mods');
+  if(mod){ setTimeout(()=>openModModal(mod.name),80); }
+}
+
+// ── TIER LIST ─────────────────────────────────────────────────
+const TIER_ORDER=['S','A','B','C','D'];
+function getTierItems(cat) {
+  const votes=LS.get('tier_'+cat)||{};
+  const items=(cat==='warframes'?allWarframes:cat==='primary'?allPrimary:cat==='secondary'?allSecondary:allMelee).map(x=>x.name);
+  const tiered={S:[],A:[],B:[],C:[],D:[],unranked:[]};
+  items.forEach(name=>{ const t=votes[name]; if(t&&TIER_ORDER.includes(t)) tiered[t].push(name); else tiered.unranked.push(name); });
+  return tiered;
+}
+function renderTierList() {
+  const tiered=getTierItems(tierCat);
+  const colors={S:'#c41e3a',A:'#e07800',B:'#2d7a00',C:'#004a8a',D:'#4a4a4a'};
+  const rows=TIER_ORDER.map(t=>'<div class="tier-row tier-'+t+'"><div class="tier-label" style="background:'+colors[t]+'">'+t+'</div><div class="tier-items">'+tiered[t].map(n=>'<div class="tier-item" onclick="openVoteModal(\''+esc(n)+'\',\''+tierCat+'\')">'+escHtml(n)+'</div>').join('')+'</div></div>').join('');
+  const unranked=tiered.unranked.length?'<div class="tier-unranked"><div class="tier-unranked-title">UNRANKED ('+tiered.unranked.length+')</div><div class="tier-items" style="flex-wrap:wrap;gap:4px">'+tiered.unranked.map(n=>'<div class="tier-item" onclick="openVoteModal(\''+esc(n)+'\',\''+tierCat+'\')">'+escHtml(n)+'</div>').join('')+'</div></div>':'';
+  document.getElementById('tier-content').innerHTML=rows+unranked;
+}
+function openVoteModal(name, cat) {
+  const votes=LS.get('tier_'+cat)||{};
+  const myVote=votes[name]||'';
+  const btns=TIER_ORDER.map(t=>'<button class="vote-btn'+(myVote===t?' selected':'')+'" onclick="castVote(\''+esc(name)+'\',\''+cat+'\',\''+t+'\')">'+t+'</button>').join('');
+  document.getElementById('modal-content').innerHTML=
+    '<div style="padding:8px 0"><div class="modal-title">'+escHtml(name)+'</div><div class="modal-subtitle">VOTE FOR TIER PLACEMENT</div><div class="vote-options">'+btns+'</div><div class="vote-current">'+(myVote?'YOUR VOTE: '+myVote:'YOU HAVEN&#39;T VOTED YET')+'</div></div>';
+  openModal();
+}
+function castVote(name, cat, tier) {
+  const votes=LS.get('tier_'+cat)||{};
+  votes[name]=tier; LS.set('tier_'+cat,votes);
+  closeModal(); renderTierList();
+}
+
+// ── COMPARE ───────────────────────────────────────────────────
+function allItems(){ return [...allWarframes,...allPrimary,...allSecondary,...allMelee]; }
+function compareSearch(query, side) {
+  const q=query.toLowerCase();
+  const matches=allItems().filter(x=>x.name.toLowerCase().includes(q)).slice(0,8);
+  const resEl=document.getElementById('cmp-'+side+'-results');
+  if(!matches.length||!q){ resEl.style.display='none'; return; }
+  resEl.style.display='block';
+  resEl.innerHTML=matches.map(m=>'<div class="compare-result-item" onclick="selectCompareItem(\''+esc(m.name)+'\',\''+side+'\')"><span>'+escHtml(m.name)+'</span><span style="font-size:10px;color:var(--text-dim);margin-left:auto">'+(m.health?'WF':'WP')+'</span></div>').join('');
+}
+function selectCompareItem(name, side) {
+  const item=allItems().find(x=>x.name===name);
+  if(!item) return;
+  if(side==='a') cmpA=item; else cmpB=item;
+  document.getElementById('cmp-'+side+'-input').value=name;
+  document.getElementById('cmp-'+side+'-results').style.display='none';
+  renderCompare();
+}
+function renderCompare() {
+  function panel(item, other) {
+    if(!item) return '<div class="compare-placeholder">SELECT AN ITEM</div>';
+    const stats=item.health?[
+      {l:'Health',v:item.health},{l:'Shield',v:item.shield},{l:'Armor',v:item.armor},{l:'Energy',v:item.power},{l:'Sprint Speed',v:item.sprintSpeed},{l:'MR Req',v:item.masteryReq||0}
+    ]:[
+      {l:'Damage',v:item.damage},{l:'Crit %',v:item.criticalChance?Math.round(item.criticalChance*100)+'%':null},{l:'Crit Mult',v:item.criticalMultiplier?item.criticalMultiplier+'x':null},{l:'Status %',v:item.procChance?Math.round(item.procChance*100)+'%':null},{l:'Fire Rate',v:item.fireRate},{l:'MR Req',v:item.masteryReq||0}
+    ];
+    const rows=stats.filter(s=>s.v!=null).map(s=>{
+      let cls=''; if(other){
+        const ov=other.health?[other.health,other.shield,other.armor,other.power,other.sprintSpeed,other.masteryReq]:
+          [other.damage,other.criticalChance,other.criticalMultiplier,other.procChance,other.fireRate,other.masteryReq];
+        const myV=parseFloat(s.v)||0, otherV=parseFloat(ov[stats.findIndex(x=>x.l===s.l)])||0;
+        if(myV>otherV) cls=' compare-win';
+      }
+      return '<div class="compare-stat"><span class="compare-stat-label">'+s.l+'</span><span class="compare-stat-val'+cls+'">'+s.v+'</span></div>';
+    }).join('');
+    return '<div class="compare-panel"><div class="compare-name">'+escHtml(item.name)+'</div>'+rows+'</div>';
+  }
+  document.getElementById('cmp-a-panel').innerHTML=panel(cmpA,cmpB);
+  document.getElementById('cmp-b-panel').innerHTML=panel(cmpB,cmpA);
+}
+
+// ── BUILD SHARE ───────────────────────────────────────────────
+function submitBuild() {
+  const name=document.getElementById('build-name')?.value.trim();
+  const item=document.getElementById('build-item')?.value.trim();
+  const cat=document.getElementById('build-category')?.value;
+  const notes=document.getElementById('build-notes')?.value.trim();
+  const author=document.getElementById('build-author')?.value.trim()||'Anonymous';
+  if(!name||!item){ alert('Please fill in a build name and item name.'); return; }
+  const build={name,item,category:cat,notes,author,timestamp:Date.now()};
+  const code='TF-'+btoa(JSON.stringify(build));
+  const builds=LS.get('community_builds')||[];
+  builds.unshift({...build,code});
+  LS.set('community_builds',builds);
+  renderCommunityBuilds();
+  ['build-name','build-item','build-notes','build-author'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+}
+function loadBuildCode() {
+  const raw=document.getElementById('build-load-code')?.value.trim();
+  if(!raw||!raw.startsWith('TF-')){ alert('Invalid build code. Codes start with TF-'); return; }
+  try {
+    const build=JSON.parse(atob(raw.replace('TF-','')));
+    alert('BUILD: '+build.name+'\nITEM: '+build.item+'\nBY: '+build.author+'\n\n'+(build.notes||'No notes.'));
+  } catch { alert('Invalid build code.'); }
+}
+const SEEDED_BUILDS=[
+  {name:'Saryn Spore Nuke — Steel Path',item:'Saryn Prime',category:'Warframe',author:'TennoFrame Staff',notes:'Spam Spores (1) to spread viral procs, then tap Miasma (4) for AoE viral cloud. Equip Natural Talent for faster casting. Absolutely melts entire Steel Path rooms in seconds.',timestamp:1700000000000,code:'TF-SEED-1',seeded:true},
+  {name:'Mesa Peacemaker DPS',item:'Mesa Prime',category:'Warframe',author:'TennoFrame Staff',notes:'Keep Shatter Shield (3) active at all times for 95% damage reduction. Max Strength for Peacemaker damage multiplier. Great for ESO, Defense, and any stationary wave content.',timestamp:1700000001000,code:'TF-SEED-2',seeded:true},
+  {name:'Khora Pilfering Farm',item:'Khora Prime',category:'Warframe',author:'TennoFrame Staff',notes:'Requires Pilfering Strangledome augment for doubled loot drops. Stack max Range + Duration. Cast Strangledome and let enemies walk into their doom. Best credit and resource farming frame in the game.',timestamp:1700000002000,code:'TF-SEED-3',seeded:true},
+  {name:'Lavos Status Primer',item:'Lavos',category:'Warframe',author:'TennoFrame Staff',notes:'No energy costs — abilities run on cooldowns. Hold abilities to infuse elements on weapons. Use Vial Rush for fast movement + status spread. Incredibly versatile for endless content.',timestamp:1700000003000,code:'TF-SEED-4',seeded:true},
+  {name:'Incarnon Felarx — All Content',item:'Felarx',category:'Primary',author:'TennoFrame Staff',notes:'Evolve to Stage 4 for max Incarnon form. Run Galvanized Chamber + Hunter Munitions + Viral setup. Alternate fire to build Incarnon gauge. Burst DPS rivals top-tier Primaries and it shreds Steel Path.',timestamp:1700000004000,code:'TF-SEED-5',seeded:true},
+  {name:'Bubonico Viral/Corrosive Spread',item:'Bubonico',category:'Primary',author:'TennoFrame Staff',notes:'Primary fire for direct damage, alt fire (Voidrig canister) to spray Viral + Corrosive on crowds. Add Primed Shred for punch-through on grouped enemies. One of the best status primers in the current meta.',timestamp:1700000005000,code:'TF-SEED-6',seeded:true},
+  {name:'Nikana Prime Condition Overload',item:'Nikana Prime',category:'Melee',author:'TennoFrame Staff',notes:'Apply 4+ status types (Viral + Heat + Corrosive + Slash) with a primer before swinging for massive Condition Overload stacks. Blood Rush + Weeping Wounds scale with combo counter. Shreds Steel Path armor.',timestamp:1700000006000,code:'TF-SEED-7',seeded:true},
+  {name:'Trumna Incarnon Heavy Hitter',item:'Trumna',category:'Primary',author:'TennoFrame Staff',notes:'Get 5 kills with alt fire to activate Incarnon mode. Full auto Incarnon form with extreme damage. Pair with Galvanized Aptitude + Primed Bane mods for faction DPS boost. Excellent for Corpus/Grineer missions.',timestamp:1700000007000,code:'TF-SEED-8',seeded:true},
+];
+function renderCommunityBuilds() {
+  const userBuilds=LS.get('community_builds')||[];
+  const el=document.getElementById('community-builds'); if(!el) return;
+  const allBuilds=[...userBuilds,...SEEDED_BUILDS];
+  const renderCard=(b)=>'<div class="build-share-card">'+(b.seeded?'<div style="font-size:9px;font-family:\'Share Tech Mono\',monospace;color:var(--accent);letter-spacing:1px;margin-bottom:4px">★ FEATURED BUILD</div>':'')+'<div class="build-share-title">'+escHtml(b.name)+'</div><div class="build-share-meta">'+escHtml(b.item)+' · '+escHtml(b.category)+' · by '+escHtml(b.author)+(b.seeded?'':' · '+new Date(b.timestamp).toLocaleDateString())+'</div>'+(b.notes?'<div style="font-size:12px;color:var(--text-dim);margin:6px 0 8px;line-height:1.5">'+escHtml(b.notes)+'</div>':'')+(b.seeded?'':'<div class="build-share-code" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+esc(b.code||'')+'\').then(()=>toast(\'Code copied!\',true))">'+escHtml(b.code||'')+'</div>')+'</div>';
+  el.innerHTML=allBuilds.map(renderCard).join('');
+}
+
+// ── TRACKER ───────────────────────────────────────────────────
+// Live data: bypass the 6-hour cache and fetch fresh each visit
+async function liveFetch(url) {
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+async function loadTracker() {
+  if(trackerLoaded) return;
+  const el=document.getElementById('tracker-content'); if(!el) return;
+  el.innerHTML='<div style="color:var(--text-dim);font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:1px">ESTABLISHING DATALINK…</div>';
+  try {
+    trackerLoaded=true;
+    const [baro, nw, events, fissures, sortie, arb] = await Promise.all([
+      liveFetch(API+'/pc/voidTrader?language=en').catch(()=>null),
+      liveFetch(API+'/pc/nightwave?language=en').catch(()=>null),
+      liveFetch(API+'/pc/events?language=en').catch(()=>null),
+      liveFetch(API+'/pc/fissures?language=en').catch(()=>null),
+      liveFetch(API+'/pc/sortie?language=en').catch(()=>null),
+      liveFetch(API+'/pc/arbitration?language=en').catch(()=>null)
+    ]);
+    const html=baroHtml(baro)+sortieHtml(sortie)+arbitrationHtml(arb)+fissuresHtml(fissures)+nwHtml(nw)+eventsHtml(events);
+    el.innerHTML=html?'<div class="tracker-grid">'+html+'</div>':'<div style="color:var(--text-dim);font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:1px;padding:16px">NO ACTIVE EVENTS FOUND</div>';
+  } catch {
+    trackerLoaded=false; // allow retry on next visit
+    el.innerHTML='<div style="color:var(--accent2);font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:1px;padding:16px;border:1px solid var(--accent2);border-radius:4px">DATALINK FAILURE — COULD NOT REACH WARFRAME API<br><br><a href="https://warframe.com" target="_blank" style="color:var(--accent)">Check warframe.com ↗</a></div>';
+  }
+}
+function baroHtml(baro) {
+  if(!baro) return '';
+  const active=baro.active;
+  const countdown='<div class="tracker-countdown">'+escHtml(active?baro.endString||'ACTIVE':baro.startString||'AWAY')+'</div>';
+  const items=active&&baro.inventory&&baro.inventory.length?'<div>'+baro.inventory.slice(0,8).map(it=>'<div class="baro-item"><div class="baro-item-name">'+escHtml(it.item)+'</div><div class="baro-item-cost"><span>'+it.ducats+'</span> duc + <span>'+it.credits.toLocaleString()+'</span> cr</div></div>').join('')+'</div>':'<div style="font-size:12px;color:var(--text-dim);padding:8px 0">'+escHtml(baro.character||'Baro')+' is not currently at a relay.</div>';
+  return '<div class="tracker-card"><div class="tracker-title">'+escHtml(baro.character||"Baro Ki'Teer")+'<span class="tracker-subtitle">VOID TRADER</span></div>'+countdown+items+'</div>';
+}
+function nwHtml(nw) {
+  if(!nw||!nw.activeChallenges) return '';
+  const challenges=(nw.activeChallenges||[]).slice(0,6);
+  const rows=challenges.map(c=>'<div class="nw-challenge"><div class="nw-check"></div><div class="nw-name">'+escHtml(c.title||c.description||'Challenge')+'</div><span class="nw-rep">+'+(c.reputation||0)+'</span></div>').join('');
+  return '<div class="tracker-card"><div class="tracker-title">Nightwave<span class="tracker-subtitle">ACTIVE CHALLENGES</span></div>'+rows+'</div>';
+}
+function eventsHtml(events) {
+  if(!events||!events.length) return '';
+  const rows=events.slice(0,4).map(e=>'<div class="baro-item"><div class="baro-item-name">'+escHtml(e.description||e.tooltip||'Event')+'</div><div class="baro-item-cost" style="color:var(--accent3)">'+escHtml(e.expiry?new Date(e.expiry).toLocaleDateString():'Active')+'</div></div>').join('');
+  return '<div class="tracker-card"><div class="tracker-title">Active Events</div>'+rows+'</div>';
+}
+
+function fissuresHtml(fissures) {
+  if(!fissures||!fissures.length) return '';
+  const active=fissures.filter(f=>!f.expired).slice(0,6);
+  if(!active.length) return '';
+  const tierColors={'Lith':'#8ab','Meso':'#9b5','Neo':'#dba','Axi':'#e8c','Requiem':'#a8e','Omnia':'var(--accent)'};
+  const rows=active.map(f=>{
+    const tier=f.tier||'Lith';
+    const col=tierColors[tier]||'var(--accent)';
+    return '<div class="baro-item"><div class="baro-item-name" style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-family:\'Share Tech Mono\',monospace;color:'+col+';border:1px solid '+col+';border-radius:2px;padding:1px 5px;flex-shrink:0">'+escHtml(tier)+'</span>'+escHtml(f.missionType||'Mission')+(f.node?'<small style="display:inline;margin-left:4px;color:var(--text-dim)">'+escHtml(f.node)+'</small>':'')+'</div><div class="baro-item-cost">'+escHtml(f.eta||'')+'</div></div>';
+  }).join('');
+  return '<div class="tracker-card"><div class="tracker-title">Void Fissures<span class="tracker-subtitle">ACTIVE RELICS</span></div>'+rows+'</div>';
+}
+function sortieHtml(sortie) {
+  if(!sortie||!sortie.variants||!sortie.variants.length) return '';
+  const rows=(sortie.variants||[]).map(v=>'<div class="baro-item"><div class="baro-item-name">'+escHtml(v.missionType||'Mission')+(v.node?'<small style="display:block;color:var(--text-dim)">'+escHtml(v.node)+'</small>':'')+'</div><div class="baro-item-cost" style="color:var(--accent2);font-size:10px">'+escHtml(v.modifier||'')+'</div></div>').join('');
+  return '<div class="tracker-card"><div class="tracker-title">Daily Sortie<span class="tracker-subtitle">'+(sortie.faction||'').toUpperCase()+'</span></div>'+rows+'<div style="font-size:10px;color:var(--text-dim);font-family:\'Share Tech Mono\',monospace;margin-top:8px;border-top:1px solid var(--border);padding-top:6px">Reward: Anasa Ayatan Sculpture or Riven Mod</div></div>';
+}
+function arbitrationHtml(arb) {
+  if(!arb||!arb.node) return '';
+  return '<div class="tracker-card"><div class="tracker-title">Arbitration<span class="tracker-subtitle">ELITE ALERT</span></div><div class="tracker-countdown">'+escHtml(arb.eta||'ACTIVE')+'</div><div class="baro-item"><div class="baro-item-name">'+escHtml(arb.type||arb.missionType||'Mission')+' — '+escHtml(arb.node||'')+'</div></div><div style="font-size:10px;color:var(--text-dim);padding-top:8px;font-family:\'Share Tech Mono\',monospace;border-top:1px solid var(--border);margin-top:6px">Arbitration Drones are immune to ability damage · One life</div></div>';
+}
+
+// ── PATCH NOTES ───────────────────────────────────────────────
+async function loadPatchNotes() {
+  if(patchLoaded) return;
+  const el=document.getElementById('patch-list'); if(!el) return;
+  const fallback=[
+    {heading:'Koumei & the Five Fates',date:'2025',body:'New warframe Koumei with unique dice-based ability mechanics — abilities scale with RNG rolls each cast. New weapons, cosmetics, and lore codex entries. Koumei can be farmed through the new associated quest.'},
+    {heading:'Warframe: 1999',date:'2024',body:'Massive open world set in 1999-era Detroit. New warframe Arthur with sword-and-gun combat. New companion Eleanor. An entirely new story chapter with retro aesthetic, new weapons, enemies, and a separate progression loop.'},
+    {heading:'Jade Shadows',date:'2024',body:'New warframe Jade with light-based healing abilities. Expands Orokin-era lore through a new cinematic story quest. New primary weapon, new cosmetics, and updates to the Warframe augment system.'},
+    {heading:'Whispers in the Walls',date:'2023',body:'New warframe Qorvex inspired by Albrecht Entrati lore. New underground Albrecht tileset. Archon Shards expanded with new tiers. New weapons and the Cavia syndicate added to Deimos.'},
+  ];
+  function patchCard(title, date, body, open) {
+    return '<div class="patch-card"><div class="patch-header" onclick="this.nextElementSibling.classList.toggle(\'open\')"><div class="patch-dot"></div><span>'+escHtml(title)+'</span><span class="patch-date">'+escHtml(date)+'</span></div><div class="patch-body'+(open?' open':'')+'">'+escHtml(body)+'</div></div>';
+  }
+  try {
+    const data=await liveFetch(API+'/pc/news?language=en');
+    // Filter out promo/link items (Discord, Wiki, Forums) and entries with missing/epoch dates
+    const promoKeywords=['discord','wiki','forum','join the','check out','visit the','learn more','coming soon','bundles'];
+    const notes=(data||[]).filter(n=>{
+      if(!n.message) return false;
+      const hasValidDate = n.date && new Date(n.date).getFullYear() > 2000;
+      if(!hasValidDate) return false;
+      const msg=(n.message||'').toLowerCase();
+      if(promoKeywords.some(k=>msg.startsWith(k))) return false;
+      return true;
+    }).slice(0,12);
+    if(!notes.length) throw new Error('empty');
+    patchLoaded=true;
+    el.innerHTML=notes.map((n,i)=>patchCard(
+      n.message||n.link||'Update',
+      n.date?new Date(n.date).toLocaleDateString():'',
+      n.message||'See the official Warframe site for full details.',
+      i===0
+    )).join('');
+  } catch {
+    // Show fallback but allow retry next time page is opened
+    el.innerHTML=fallback.map((n,i)=>patchCard(n.heading,n.date,n.body,i===0)).join('');
+  }
+}
+
+// ── RENDER FUNCTIONS ──────────────────────────────────────────
+function renderWarframes() {
+  let list=sortList(allWarframes,currentSort);
+  if(currentSearch) list=list.filter(w=>w.name.toLowerCase().includes(currentSearch));
+  const el=document.getElementById('count-wf'); if(el) el.textContent=list.length;
+  const grid=document.getElementById('warframe-grid'); if(!grid) return;
+  if(!list.length){ grid.innerHTML='<div class="no-results">NO RESULTS FOUND</div>'; return; }
+  grid.innerHTML=list.map(w=>{
+    const src=itemImg(w); const ini=w.name.substring(0,2).toUpperCase();
+    const imgHtml=src?'<div class="wf-card-img-wrap" data-src="'+src+'" data-ini="'+ini+'"><div class="wf-card-img-placeholder">'+ini+'</div></div>':'<div class="wf-card-img-placeholder">'+ini+'</div>';
+    const reviews=getReviews(w.name); const avg=reviews.length?reviews.reduce((s,r)=>s+r.rating,0)/reviews.length:0;
+    const ratingHtml=reviews.length?'<div style="margin-top:4px;display:flex;align-items:center;gap:4px"><span class="mini-stars">'+miniStarsHtml(avg)+'</span><span class="mini-rating-txt">'+avg.toFixed(1)+' ('+reviews.length+')</span></div>':'';
+    return '<div class="wf-card" data-item-name="'+w.name.toLowerCase()+'" onclick="openWfModal(\''+esc(w.name)+'\')">'+imgHtml+'<div class="wf-card-body"><span class="wf-name">'+escHtml(w.name)+'</span><div class="wf-type"><div class="wf-type-dot"></div>MR '+(w.masteryReq||0)+'</div><div class="wf-stats"><div class="stat-chip"><span class="stat-chip-label">HP</span><span class="stat-chip-val">'+(w.health||'?')+'</span></div><div class="stat-chip"><span class="stat-chip-label">SHD</span><span class="stat-chip-val">'+(w.shield||'?')+'</span></div><div class="stat-chip"><span class="stat-chip-label">ARM</span><span class="stat-chip-val">'+(w.armor||'?')+'</span></div></div>'+ratingHtml+'</div></div>';
+  }).join('');
+  setTimeout(initImgObserver, 50);
+}
+function renderWeapons(cat) {
+  const arr=cat==='primary'?allPrimary:cat==='secondary'?allSecondary:allMelee;
+  const filter=cat==='primary'?prFilter:cat==='secondary'?seFilter:meFilter;
+  let list=sortList(arr,currentSort);
+  if(currentSearch) list=list.filter(w=>w.name.toLowerCase().includes(currentSearch));
+  if(filter) {
+    if(filter.startsWith('mr:')) {
+      const parts=filter.slice(3).split('-').map(Number);
+      list=list.filter(w=>{ const mr=w.masteryReq||0; return mr>=parts[0]&&mr<=parts[1]; });
+    } else {
+      // Alias table handles both the detailed inline-data type names and any
+      // simplified variants that different API versions may return.
+      const TYPE_ALIASES={
+        'sniper rifle':    ['sniper rifle','sniper'],
+        'sniper':          ['sniper','sniper rifle'],
+        'throwing':        ['throwing','thrown'],
+        'thrown':          ['thrown','throwing'],
+      };
+      const f=filter.toLowerCase();
+      const matchSet=new Set(TYPE_ALIASES[f]||[f]);
+      list=list.filter(w=>matchSet.has((w.type||'').toLowerCase()));
+    }
+  }
+  const countId='count-'+cat.substring(0,2); const el=document.getElementById(countId); if(el) el.textContent=list.length;
+  const gridId=cat+'-grid'; const grid=document.getElementById(gridId); if(!grid) return;
+  if(!list.length){ grid.innerHTML='<div class="no-results">NO RESULTS FOUND</div>'; return; }
+  grid.innerHTML=list.map(w=>{
+    const src=itemImg(w); const ini=w.name.substring(0,2).toUpperCase();
+    const iconHtml=src?'<div class="wp-icon"><span class="wp-icon-wrap" data-src="'+src+'"><img src="'+src+'" alt="'+ini+'" loading="lazy" onerror="this.parentNode.textContent=\''+ini+'\'"></span></div>':'<div class="wp-icon">'+ini+'</div>';
+    const reviews=getReviews(w.name); const avg=reviews.length?reviews.reduce((s,r)=>s+r.rating,0)/reviews.length:0;
+    const ratingHtml=reviews.length?'<span class="mini-stars">'+miniStarsHtml(avg)+'</span><span class="mini-rating-txt"> '+avg.toFixed(1)+'</span>':'';
+    const dmgVal=getDamage(w);
+    const baseDPS=dmgVal&&w.fireRate?Math.round(dmgVal*w.fireRate):null;
+    return '<div class="weapon-card" data-item-name="'+w.name.toLowerCase()+'" onclick="openWeaponModal(\''+esc(w.name)+'\',\''+cat+'\')">'+iconHtml+'<div class="weapon-info"><span class="weapon-name">'+escHtml(w.name)+'</span><div class="weapon-sub">'+(w.type||'').toUpperCase()+(w.masteryReq?' · MR '+(w.masteryReq||0):'')+'</div><div class="weapon-stats"><span class="ws"><span>DMG</span>'+(dmgVal||'?')+'</span><span class="ws"><span>CRIT</span>'+(w.criticalChance?Math.round(w.criticalChance*100)+'%':'?')+'</span><span class="ws"><span>ST</span>'+(w.procChance?Math.round(w.procChance*100)+'%':'?')+'</span>'+(baseDPS?'<span class="ws" title="Base DPS (Damage × Fire Rate)"><span>DPS</span>'+baseDPS+'</span>':'')+'</div>'+ratingHtml+'</div></div>';
+  }).join('');
+}
+function renderMods() {
+  let list=sortList(allMods,currentSort);
+  if(currentSearch) list=list.filter(m=>m.name.toLowerCase().includes(currentSearch));
+  if(moFilter) list=list.filter(m=>(m.type||'').toLowerCase().includes(moFilter.toLowerCase()));
+  const el=document.getElementById('count-mo'); if(el) el.textContent=list.length;
+  const grid=document.getElementById('mod-grid'); if(!grid) return;
+  if(!list.length){ grid.innerHTML='<div class="no-results">NO RESULTS FOUND</div>'; return; }
+  grid.innerHTML=list.map(m=>{
+    const src=itemImg(m); const ini=m.name.substring(0,2).toUpperCase();
+    const r=m.rarity||'Common';
+    const iconHtml=src?'<div class="mod-icon"><img src="'+src+'" alt="'+ini+'" loading="lazy" onerror="this.parentNode.textContent=\''+ini+'\'"></div>':'<div class="mod-icon">'+ini+'</div>';
+    return '<div class="mod-card rarity-'+r+'" onclick="openModModal(\''+esc(m.name)+'\')">'+iconHtml+'<div class="mod-info"><span class="mod-name">'+escHtml(m.name)+'</span><span class="mod-rank">MAX RANK '+(m.fusionLimit||0)+'</span><span class="mod-type-badge">'+escHtml(m.type||'MOD')+'</span></div></div>';
+  }).join('');
+}
+function renderCurrent() {
+  if(currentPage==='warframes') renderWarframes();
+  else if(currentPage==='primary') renderWeapons('primary');
+  else if(currentPage==='secondary') renderWeapons('secondary');
+  else if(currentPage==='melee') renderWeapons('melee');
+  else if(currentPage==='mods') renderMods();
+  else if(currentPage==='tierlist') renderTierList();
+  else if(currentPage==='compare') renderCompare();
+  else if(currentPage==='builds') renderCommunityBuilds();
+}
+
+// ── PAGE NAVIGATION ───────────────────────────────────────────
+function setPage(page) {
+  currentPage=page; currentSearch=''; selectedStar=0;
+  document.querySelectorAll('.nav-item,.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+page); if(pg) pg.classList.add('active');
+  const sb=document.getElementById('search-bar'); if(sb){ sb.value=''; sb.placeholder={warframes:'Search warframes…',primary:'Search primary weapons…',secondary:'Search secondary weapons…',melee:'Search melee weapons…',mods:'Search mods…',patchnotes:'Search patch notes…'}[page]||'Search…'; }
+  if(page==='tracker') loadTracker();
+  else if(page==='patchnotes') loadPatchNotes();
+  renderCurrent();
+  window.scrollTo(0,0);
+  setTimeout(()=>{ if(imgObserver) document.querySelectorAll('[data-src]').forEach(el=>imgObserver.observe(el)); },150);
+}
+
+// ── DATA PROCESSORS ───────────────────────────────────────────
+function revealGrid(skelId, gridId) {
+  const sk=document.getElementById(skelId); if(sk) sk.remove();
+  const gr=document.getElementById(gridId); if(gr) gr.style.display='';
+}
+function processWarframes(data) {
+  allWarframes=dedupe((data||[]).filter(w=>w.name)).sort((a,b)=>a.name.localeCompare(b.name));
+  const b=document.getElementById('badge-wf'); if(b) b.textContent=allWarframes.length;
+  const mb=document.getElementById('mbadge-wf'); if(mb) mb.textContent=allWarframes.length;
+  renderWarframes();
+  revealGrid('wf-skeleton','warframe-grid');
+}
+function processWeapons(data) {
+  const all=(data||[]).filter(w=>w.name&&w.category);
+  allPrimary=dedupe(all.filter(w=>w.category==='Primary')).sort((a,b)=>a.name.localeCompare(b.name));
+  allSecondary=dedupe(all.filter(w=>w.category==='Secondary')).sort((a,b)=>a.name.localeCompare(b.name));
+  allMelee=dedupe(all.filter(w=>w.category==='Melee')).sort((a,b)=>a.name.localeCompare(b.name));
+  const setBadge=(id,arr)=>{ const el=document.getElementById(id); if(el) el.textContent=arr.length; };
+  setBadge('badge-pr',allPrimary); setBadge('badge-se',allSecondary); setBadge('badge-me',allMelee);
+  revealGrid('pr-skeleton','primary-grid');
+  revealGrid('se-skeleton','secondary-grid');
+  revealGrid('me-skeleton','melee-grid');
+}
+function processMods(data) {
+  allMods=dedupe((data||[]).filter(m=>m.name&&m.polarity)).sort((a,b)=>a.name.localeCompare(b.name));
+  const b=document.getElementById('badge-mo'); if(b) b.textContent=allMods.length;
+  revealGrid('mo-skeleton','mod-grid');
+}
+
+// ── LIVE API FETCHERS (fallback when no inline data) ──────────
+async function ensureWarframes() {
+  if(loaded.warframes) return; loaded.warframes=true;
+  const cached=cacheGet('warframes'); if(cached){ processWarframes(cached); return; }
+  toast('Loading warframes…');
+  try { const d=await apiFetch(API+'/warframes','warframes'); processWarframes(d); toastHide(); }
+  catch { document.getElementById('wf-error').style.display='block'; revealGrid('wf-skeleton','warframe-grid'); toastHide(); }
+}
+async function ensureWeapons() {
+  if(loaded.weapons) return; loaded.weapons=true;
+  const cached=cacheGet('weapons'); if(cached){ processWeapons(cached); return; }
+  toast('Loading weapons…');
+  try { const d=await apiFetch(API+'/weapons','weapons'); processWeapons(d); toastHide(); }
+  catch { document.getElementById('wp-error').style.display='block'; revealGrid('pr-skeleton','primary-grid'); toastHide(); }
+}
+async function ensureMods() {
+  if(loaded.mods) return; loaded.mods=true;
+  const cached=cacheGet('mods'); if(cached){ processMods(cached); return; }
+  toast('Loading mods…');
+  try { const d=await apiFetch(API+'/mods','mods'); processMods(d); toastHide(); }
+  catch { document.getElementById('mo-error').style.display='block'; revealGrid('mo-skeleton','mod-grid'); toastHide(); }
+}
+
+
+// ── LIVE API FULL LOADER ──────────────────────────────────────
+// Fetches all warframes, weapons and mods from the live API.
+// Results are cached in localStorage for 24 hours.
+// On success, silently replaces any inline static data with full dataset.
+const LS_TTL = 24 * 60 * 60 * 1000;
+
+function lsGet(key) {
+  try {
+    const raw = localStorage.getItem('tf_full_'+key);
+    if(!raw) return null;
+    const {ts, data} = JSON.parse(raw);
+    if(Date.now() - ts > LS_TTL) { localStorage.removeItem('tf_full_'+key); return null; }
+    return data;
+  } catch { return null; }
+}
+function lsSet(key, data) {
+  try { localStorage.setItem('tf_full_'+key, JSON.stringify({ts:Date.now(), data})); } catch(e) {
+    // localStorage full — clear old cache and retry
+    try { localStorage.clear(); localStorage.setItem('tf_full_'+key, JSON.stringify({ts:Date.now(), data})); } catch{}
+  }
+}
+
+async function loadAllFromAPI() {
+  // Check localStorage cache first
+  const cachedWF  = lsGet('warframes');
+  const cachedWP  = lsGet('weapons');
+  const cachedMod = lsGet('mods');
+
+  if(cachedWF && cachedWP && cachedMod) {
+    // Instant load from cache — upgrade inline data silently
+    loaded.warframes = loaded.weapons = loaded.mods = true;
+    processWarframes(cachedWF);
+    processWeapons(cachedWP);
+    processMods(cachedMod);
+    return;
+  }
+
+  // Fetch from live API in parallel
+  toast('Syncing full database…');
+  try {
+    const [wfRes, wpRes, modRes] = await Promise.all([
+      fetch(API+'/warframes?language=en'),
+      fetch(API+'/weapons?language=en'),
+      fetch(API+'/mods?language=en'),
+    ]);
+
+    const [wfData, wpData, modData] = await Promise.all([
+      wfRes.json(),
+      wpRes.json(),
+      modRes.json(),
+    ]);
+
+    // Cache for next visit
+    if(wfData  && wfData.length  > 10) lsSet('warframes', wfData);
+    if(wpData  && wpData.length  > 10) lsSet('weapons',   wpData);
+    if(modData && modData.length > 10) lsSet('mods',      modData);
+
+    // Replace data with full set
+    loaded.warframes = loaded.weapons = loaded.mods = true;
+    processWarframes(wfData  || []);
+    processWeapons(wpData    || []);
+    processMods(modData      || []);
+
+    toast('Database synced — '+wfData.length+' warframes, '+wpData.length+' weapons, '+modData.length+' mods', true);
+  } catch(e) {
+    // API unreachable — inline static data already showing, just hide toast
+    toastHide();
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+function init() {
+  // Navigation
+  document.querySelectorAll('.nav-item,.nav-btn').forEach(el=>{
+    el.addEventListener('click',()=>setPage(el.dataset.page));
+  });
+
+  // Search
+  document.getElementById('search-bar').addEventListener('input',e=>{
+    currentSearch=e.target.value.toLowerCase(); renderCurrent();
+  });
+
+  // Sort
+  document.getElementById('sort-select').addEventListener('change',e=>{
+    currentSort=e.target.value; renderCurrent();
+  });
+
+  // Filter pills
+  document.querySelectorAll('.filter-pills').forEach(wrap=>{
+    wrap.addEventListener('click',e=>{
+      const pill=e.target.closest('.pill'); if(!pill) return;
+      wrap.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+      const f=pill.dataset.filter||'';
+      const page=wrap.id.replace('-filters','');
+      if(page==='pr') prFilter=f;
+      else if(page==='se') seFilter=f;
+      else if(page==='me') meFilter=f;
+      else if(page==='mod') moFilter=f;
+      renderCurrent();
+    });
+  });
+
+  // Tier tabs
+  document.querySelectorAll('.tier-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.tier-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active'); tierCat=tab.dataset.cat; renderTierList();
+    });
+  });
+
+  // Compare inputs
+  ['a','b'].forEach(side=>{
+    document.getElementById('cmp-'+side+'-input').addEventListener('input',e=>compareSearch(e.target.value,side));
+    document.getElementById('cmp-'+side+'-input').addEventListener('blur',()=>setTimeout(()=>{ const el=document.getElementById('cmp-'+side+'-results'); if(el) el.style.display='none'; },200));
+  });
+
+  // Modal close
+  document.getElementById('modal-close-btn').addEventListener('click',closeModal);
+  document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target.id==='modal-overlay') closeModal(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+  document.getElementById('modal').addEventListener('touchstart',e=>{ window._touchStartY=e.touches[0].clientY; },{passive:true});
+  document.getElementById('modal').addEventListener('touchend',e=>{ if(e.changedTouches[0].clientY-window._touchStartY>80) closeModal(); },{passive:true});
+
+  // Patch card toggle (delegated)
+  document.getElementById('patch-list').addEventListener('click',e=>{
+    const h=e.target.closest('.patch-header'); if(!h) return;
+    h.nextElementSibling.classList.toggle('open');
+  });
+
+  // Load data
+  // Step 1: Show inline static data instantly (placeholder)
+  if(window.TF_DATA) {
+    processWarframes(window.TF_DATA.warframes||[]);
+    processWeapons(window.TF_DATA.weapons||[]);
+    processMods(window.TF_DATA.mods||[]);
+  }
+  // Step 2: Always fetch full live data (1000+ items) — upgrades inline data silently
+  loadAllFromAPI();
+  setTimeout(loadDrops, 3000);
+}
+
+// Run after DOM is ready
+if(document.readyState==='loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
