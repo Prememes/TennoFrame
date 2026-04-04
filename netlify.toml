@@ -1,0 +1,6 @@
+[build]
+  command = "pip install requests && python3 fetch_data.py || echo 'fetch_data.py not found, deploying with existing data'"
+  publish = "."
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
