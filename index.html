@@ -59,7 +59,7 @@
   --accent:#00d4ff;--accent2:#ff6b1a;--accent3:#7fff6b;
   --text:#d0e8f0;--text-dim:#6a8fa8;--text-bright:#f0f8ff;
   --star:#ffc940;
-  --sidebar-w:230px;--header-h:62px;--ad-h:0px;--nav-mob-h:56px;
+  --sidebar-w:230px;--header-h:62px;--ad-h:90px;--nav-mob-h:56px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size:14px;overflow-x:hidden}
@@ -88,8 +88,11 @@ header{
 
 /* ── AD BANNER ── */
 .ad-banner{
-  display:none !important;
-  font-size:11px;color:var(--text-dim);letter-spacing:1px;font-family:'Share Tech Mono',monospace;
+  display:flex;
+  align-items:center;justify-content:center;
+  width:100%;min-height:90px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
 }
 
 /* ── SIDEBAR ── */
@@ -347,6 +350,7 @@ header{
   #shell{margin-top:calc(var(--header-h) + var(--ad-h))}
   .ad-banner{display:none}
   #shell{margin-top:var(--header-h)}
+
   #mob-nav{display:flex}
   .logo-sub{display:none}
   #modal{border-radius:16px 16px 0 0;max-height:85vh}
@@ -471,7 +475,16 @@ header{
        data-ad-slot="4234636972"
        data-ad-format="auto"
        data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  <script>
+    // Lazy-load: only push the ad after content has rendered to avoid
+    // the "ads on screens without publisher-content" AdSense policy warning
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        try { (adsbygoogle = window.adsbygoogle || []).push({}); }
+        catch(e) {}
+      }, 800);
+    });
+  </script>
 </div>
 
 <div id="shell">
@@ -1753,6 +1766,104 @@ window.tfLoadReviews = async (itemName) => {
     return snap.docs.map(d => ({ ...d.data(), timestamp: d.data().timestamp?.toMillis?.() || Date.now() }));
   } catch(e) { console.warn('Firestore load failed', e); return null; }
 };
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     AdMob Interstitial — only runs inside Capacitor native app
+     Replace INTERSTITIAL_AD_UNIT_ID with your actual ad unit ID
+     ═══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  // Ad unit ID — replace with your real interstitial ad unit ID from AdMob
+  var INTERSTITIAL_AD_UNIT_ID = 'ca-app-pub-6699439857830995/5157439042';
+
+  // Only run inside the Capacitor native app, not regular web browser
+  function isNativeApp() {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  }
+
+  var adReady = false;
+  var adShownCount = 0;
+
+  function initAdMob() {
+    if (!isNativeApp()) return;
+    var AdMob = window.Capacitor.Plugins.AdMob;
+    if (!AdMob) return;
+
+    AdMob.initialize({ requestTrackingAuthorization: true })
+      .then(function() { prepareInterstitial(); })
+      .catch(function(e) { console.warn('[AdMob] initialize failed', e); });
+  }
+
+  function prepareInterstitial() {
+    if (!isNativeApp()) return;
+    var AdMob = window.Capacitor.Plugins.AdMob;
+    if (!AdMob) return;
+
+    AdMob.prepareInterstitial({ adId: INTERSTITIAL_AD_UNIT_ID, isTesting: false })
+      .then(function() {
+        adReady = true;
+        console.log('[AdMob] Interstitial ready');
+      })
+      .catch(function(e) { console.warn('[AdMob] prepareInterstitial failed', e); });
+  }
+
+  function showInterstitial() {
+    if (!isNativeApp() || !adReady) return;
+    var AdMob = window.Capacitor.Plugins.AdMob;
+    if (!AdMob) return;
+
+    adReady = false;
+    AdMob.showInterstitial()
+      .then(function() {
+        adShownCount++;
+        // Preload the next ad after this one closes
+        setTimeout(prepareInterstitial, 2000);
+        // Schedule the next interstitial in 5 minutes
+        scheduleNextAd();
+      })
+      .catch(function(e) {
+        console.warn('[AdMob] showInterstitial failed', e);
+        prepareInterstitial();
+      });
+  }
+
+  function scheduleNextAd() {
+    // Show interstitial every 5 minutes after the first one
+    setTimeout(function() {
+      if (adReady) {
+        showInterstitial();
+      } else {
+        // If not ready yet, retry in 30 seconds
+        setTimeout(function() { if (adReady) showInterstitial(); }, 30000);
+      }
+    }, 5 * 60 * 1000);
+  }
+
+  // Wait for Capacitor to be ready, then initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!isNativeApp()) return;
+
+    // Give Capacitor plugins a moment to register
+    setTimeout(function() {
+      initAdMob();
+      // Show first interstitial after 3 minutes of use
+      setTimeout(function() {
+        if (adReady) {
+          showInterstitial();
+        } else {
+          // If not ready, check every 15 seconds until it is
+          var retryInterval = setInterval(function() {
+            if (adReady) {
+              clearInterval(retryInterval);
+              showInterstitial();
+            }
+          }, 15000);
+        }
+      }, 3 * 60 * 1000);
+    }, 1500);
+  });
+})();
 </script>
 
 </body>
